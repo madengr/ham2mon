@@ -22,19 +22,20 @@ The following is an example of the option switches, although omission of any wil
 
 GUI controls:
 
-t/r = Detection threshold +/- 5 dB
-p/o = Spectrum upper scale +/- 10 dB
-w/q = Spectrum lower scale +/- 10 dB
-g/f = RF gain +/- 10 dB
-s/a = Squelch +/- 5 dB
-./, = Volume +/- 1 dB
-k/j = RF center frequency +/- 100 kHz
-m/n = RF center frequency +/- 1 MHz
-v/c = RF center frequency +/- 10 MHz
-x/z = RF center frequency +/- 100 MHz
-0..9 = Lockout channel (must press during reception)
-l = Clear lockouts
-CTRL-C = quit
+'t/r = Detection threshold +/- 5 dB'
+'p/o = Spectrum upper scale +/- 10 dB'
+'w/q = Spectrum lower scale +/- 10 dB'
+'g/f = RF gain +/- 10 dB'
+'s/a = Squelch +/- 5 dB'
+'./, = Volume +/- 1 dB'
+'k/j = RF center frequency +/- 100 kHz'
+'m/n = RF center frequency +/- 1 MHz'
+'v/c = RF center frequency +/- 10 MHz'
+'x/z = RF center frequency +/- 100 MHz'
+'0..9 = Lockout channel (must press during reception)'
+'l = Clear lockouts'
+'CTRL-C = quit'
+
 
 The high speed signal processing is done in GR and the logic & control in Python. There are no custom GR blocks.  The GUI is written in Curses and is meant to be lightweight.  See the video for a basic overview.  I attempted to make the program very object oriented and “Pythonic”.  Each module runs on it's own for testing purposes.
 
