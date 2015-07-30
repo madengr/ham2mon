@@ -10,7 +10,7 @@ Author: Louis Brown KD4HSO
 Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
-- GNU Radio 3.7.7 (https://github.com/gnuradio/gnuradio)
+- GNU Radio 3.7.8 (https://github.com/gnuradio/gnuradio)
 - GrOsmoSDR 0.1.4 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
 - Ettus UHD 3.9.0 (https://github.com/EttusResearch/uhd)
 
