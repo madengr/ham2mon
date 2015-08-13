@@ -65,7 +65,7 @@ class CLParser(object):
 
         parser.add_option("-w", "--write",
                           dest="record", default=False, action="store_true",
-                          help="Record (write) channles to disk")
+                          help="Record (write) channels to disk")
 
         parser.add_option("-l", "--lockout", type="string",
                           dest="lockout_file_name",
