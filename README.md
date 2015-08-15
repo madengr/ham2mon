@@ -18,16 +18,20 @@ atpage:
 - Fixed typos
 
 john:
-- Added frequency correction
+- Added frequency correction option switch
 
 madengr:
 - Initial code 
 
 ##Console operation:
 
-The following is an example of the option switches, although omission of any will use default values (shown below) that are optimal for the B200:
+The following is an example of the option switches for UHD, although omission of any will use default values (shown below) that are optimal for the B200:
 
 ./ham2mon.py -a "uhd" -n 8 -f 146E6 -r 4E6 -g 30 -s -60 -v 0 -t 10 -w
+
+The following is an example of the option switches for RTL2832U.  Note the sample rate, squelch, and threshold have changed to reflect the reduced (8-bit) dynamic range of the RTL dongles compared to Ettus SDRs.  In addition, these devices have poor IMD and image suppression, so strong signals may cause false demodulator locks:
+
+./ham2mon.py -a "rtl" -n 4 -f 145E6 -r 2E6 -g 20 -s -40 -v 0 -t 30 -w
 
 ##GUI controls:
 
@@ -57,9 +61,6 @@ The following is an example of the option switches, although omission of any wil
 
 `CTRL-C = quit`
 
-The following is an example of the option switches for RTL2832U.  Note the sample rate, squelch, and threshold have changed to reflect the reduced (8-bit) dynamic range of the RTL dongles compared to Ettus SDRs.  In addition, these devices have poor IMD and image suppression, so strong signals may cause false demodulator locks:
-
-./ham2mon.py -a "rtl" -n 4 -f 145E6 -r 2E6 -g 20 -s -40 -v 0 -t 30 -w
 
 The high speed signal processing is done in GR and the logic & control in Python. There are no custom GR blocks.  The GUI is written in Curses and is meant to be lightweight.  See the video for a basic overview.  I attempted to make the program very object oriented and “Pythonic”.  Each module runs on it's own for testing purposes.
 
