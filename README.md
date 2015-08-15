@@ -6,7 +6,7 @@ This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily me
 http://youtu.be/BXptQFSV8E4
 
 
-Contributors:
+#Contributors:
 
 atpage:
 - Fixed typos
@@ -18,7 +18,7 @@ madengr:
 - Initial code 
 
 
-Tested with:
+#Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.7.8 (https://github.com/gnuradio/gnuradio)
@@ -31,7 +31,7 @@ The following is an example of the option switches, although omission of any wil
 
 ./ham2mon.py -a "uhd" -n 8 -f 146E6 -r 4E6 -g 30 -s -60 -v 0 -t 10 -w
 
-GUI controls:
+#GUI controls:
 
 `t/r = Detection threshold +/- 5 dB`
 
