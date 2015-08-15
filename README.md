@@ -5,7 +5,14 @@ This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily me
 
 http://youtu.be/BXptQFSV8E4
 
-Author: Louis Brown KD4HSO
+Contributors:
+
+atpage:
+	- Fixed typos
+john:
+	- Added frequency correction
+madengr:
+	– Initial code 
 
 Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
