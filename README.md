@@ -9,8 +9,10 @@ Contributors:
 
 atpage:
 - Fixed typos
+
 john:
 - Added frequency correction
+
 madengr:
 – Initial code 
 
