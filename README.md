@@ -5,18 +5,7 @@ This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily me
 
 http://youtu.be/BXptQFSV8E4
 
-
-##Contributors:
-
-atpage:
-- Fixed typos
-
-john:
-- Added frequency correction
-
-madengr:
-- Initial code 
-
+![GUI screenshot](https://github.com/madengr/ham2mon/blob/master/ham2mon.png)
 
 ##Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
@@ -25,7 +14,15 @@ madengr:
 - GrOsmoSDR 0.1.4 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
 - Ettus UHD 3.9.0 (https://github.com/EttusResearch/uhd)
 
-![GUI screenshot](https://github.com/madengr/ham2mon/blob/master/ham2mon.png)
+##Contributors:
+###atpage:
+- Fixed typos
+###john:
+- Added frequency correction
+###madengr:
+- Initial code 
+
+##Console operation:
 
 The following is an example of the option switches, although omission of any will use default values (shown below) that are optimal for the B200:
 
@@ -80,4 +77,4 @@ The ham2mon.py interfaces the scanner.py with the curses.py GUI.  The GUI provid
 The default settings are optimized for an Ettus B200.  The RTL dongle will require raising the squelch and adjustment of the spectrum scale and threshold.
 
 The next iteration of this program will probably use gr-dsd to decode P25 public safety in the 800 MHz band.
-
+http://start.fedoraproject.org/
