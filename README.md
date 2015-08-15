@@ -8,11 +8,11 @@ http://youtu.be/BXptQFSV8E4
 Contributors:
 
 atpage:
-	- Fixed typos
+- Fixed typos
 john:
-	- Added frequency correction
+- Added frequency correction
 madengr:
-	– Initial code 
+– Initial code 
 
 Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
