@@ -15,11 +15,14 @@ http://youtu.be/BXptQFSV8E4
 - Ettus UHD 3.9.0 (https://github.com/EttusResearch/uhd)
 
 ##Contributors:
-###atpage:
+
+atpage:
 - Fixed typos
-###john:
+
+john:
 - Added frequency correction
-###madengr:
+
+madengr:
 - Initial code 
 
 ##Console operation:
