@@ -23,7 +23,7 @@ john:
 madengr:
 - Initial code 
 
-##Console operation:
+##Console Operation:
 
 The following is an example of the option switches for UHD, although omission of any will use default values (shown below) that are optimal for the B200:
 
@@ -33,7 +33,7 @@ The following is an example of the option switches for RTL2832U.  Note the sampl
 
 ./ham2mon.py -a "rtl" -n 4 -f 145E6 -r 2E6 -g 20 -s -40 -v 0 -t 30 -w
 
-##GUI controls:
+##GUI Controls:
 
 `t/r = Detection threshold +/- 5 dB`
 
@@ -61,7 +61,7 @@ The following is an example of the option switches for RTL2832U.  Note the sampl
 
 `CTRL-C = quit`
 
-
+##Description:
 The high speed signal processing is done in GR and the logic & control in Python. There are no custom GR blocks.  The GUI is written in Curses and is meant to be lightweight.  See the video for a basic overview.  I attempted to make the program very object oriented and “Pythonic”.  Each module runs on it's own for testing purposes.
 
 ![GRC screenshot](https://github.com/madengr/ham2mon/blob/master/flow_example.png)
