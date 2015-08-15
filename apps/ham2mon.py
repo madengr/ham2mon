@@ -47,8 +47,9 @@ def main(screen):
     hw_args = PARSER.hw_args
     record = PARSER.record
     lockout_file_name = PARSER.lockout_file_name
-    scanner = scnr.Scanner(ask_samp_rate, num_demod, hw_args, record,
-                           lockout_file_name)
+    freq_correction = PARSER.freq_correction
+    scanner = scnr.Scanner(ask_samp_rate, num_demod, hw_args,
+                           freq_correction, record, lockout_file_name)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)

@@ -204,6 +204,7 @@ class Receiver(gr.top_block):
         ask_samp_rate (float): Asking sample rate of hardware in sps (1E6 min)
         num_demod (int): Number of parallel demodulators
         hw_args (string): Argument string to pass to harwdare
+        freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
 
     Attributes:
@@ -217,7 +218,7 @@ class Receiver(gr.top_block):
     # pylint: disable=too-many-locals
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, hw_args="uhd",
-                 record=True):
+                 freq_correction=0, record=True):
         # Call the initialization method from the parent class
         gr.top_block.__init__(self, "Receiver")
 
@@ -233,6 +234,7 @@ class Receiver(gr.top_block):
         self.src.set_sample_rate(ask_samp_rate)
         self.src.set_gain(self.gain_db)
         self.src.set_center_freq(self.center_freq)
+        self.src.set_freq_corr(freq_correction)
 
         # Get the sample rate and center frequency from the hardware
         self.samp_rate = self.src.get_sample_rate()

@@ -26,6 +26,7 @@ class Scanner(object):
         ask_samp_rate (float): Asking sample rate of hardware in sps (1E6 min)
         num_demod (int): Number of parallel demodulators
         hw_args (string): Argument string to pass to harwdare
+        freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
 
     Attributes:
@@ -46,7 +47,7 @@ class Scanner(object):
     # pylint: disable=too-many-arguments
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, hw_args="uhd",
-                 record=True, lockout_file_name=""):
+                 freq_correction=0, record=True, lockout_file_name=""):
         # Default values
         self.gain_db = 30
         self.squelch_db = -60
@@ -62,7 +63,7 @@ class Scanner(object):
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, hw_args,
-                                       record)
+                                       freq_correction, record)
 
         # Get the hardware sample rate and center frequency
         self.samp_rate = self.receiver.samp_rate
