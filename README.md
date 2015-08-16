@@ -79,4 +79,4 @@ The ham2mon.py interfaces the scanner.py with the curses.py GUI.  The GUI provid
 The default settings are optimized for an Ettus B200.  The RTL dongle will require raising the squelch and adjustment of the spectrum scale and threshold.
 
 The next iteration of this program will probably use gr-dsd to decode P25 public safety in the 800 MHz band.
-http://start.fedoraproject.org/
+
