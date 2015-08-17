@@ -41,6 +41,10 @@ class CLParser(object):
                           default=4,
                           help="Number of demodulators")
 
+        parser.add_option("-d", "--demodulator", type="int", dest="type_demod",
+                          default=0,
+                          help="Type of demodulator (0=NBFM, 1=AM)")
+
         parser.add_option("-f", "--freq", type="string", dest="center_freq",
                           default=146E6,
                           help="Hardware RF center frequency in Hz")
@@ -82,6 +86,7 @@ class CLParser(object):
 
         self.hw_args = str(options.hw_args)
         self.num_demod = int(options.num_demod)
+        self.type_demod = int(options.type_demod)
         self.center_freq = float(options.center_freq)
         self.ask_samp_rate = float(options.ask_samp_rate)
         self.gain_db = float(options.gain_db)
@@ -104,6 +109,7 @@ def main():
 
     print "hw_args:             " + parser.hw_args
     print "num_demod:           " + str(parser.num_demod)
+    print "type_demod:          " + str(parser.type_demod)
     print "center_freq:         " + str(parser.center_freq)
     print "ask_samp_rate:       " + str(parser.ask_samp_rate)
     print "gain_db:             " + str(parser.gain_db)
