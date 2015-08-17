@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
 ##################################################
 # GNU Radio Python Flow Graph
-# Title: Ham2Mon Receiver Flow Example
+# Title: Ham2Mon AM Receiver Flow Example
 # Description: Example of GR DSP flow in receiver.py
-# Generated: Wed Jul 22 19:05:13 2015
+# Generated: Sun Aug 16 20:36:43 2015
 ##################################################
 
 if __name__ == '__main__':
@@ -31,20 +31,19 @@ from gnuradio.filter import firdes
 from gnuradio.filter import pfb
 from gnuradio.qtgui import Range, RangeWidget
 from optparse import OptionParser
-import math
 import numpy as np
 import osmosdr
 import sip
 import sys
 import time
 
-from distutils.version import StrictVersion
-class flow_example(gr.top_block, Qt.QWidget):
+
+class am_flow_example(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "Ham2Mon Receiver Flow Example")
+        gr.top_block.__init__(self, "Ham2Mon AM Receiver Flow Example")
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("Ham2Mon Receiver Flow Example")
+        self.setWindowTitle("Ham2Mon AM Receiver Flow Example")
         try:
              self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
         except:
@@ -61,9 +60,8 @@ class flow_example(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "flow_example")
+        self.settings = Qt.QSettings("GNU Radio", "am_flow_example")
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
-
 
         ##################################################
         # Variables
@@ -264,17 +262,20 @@ class flow_example(gr.top_block, Qt.QWidget):
         self.blocks_keep_one_in_n_0 = blocks.keep_one_in_n(gr.sizeof_gr_complex*fft_length, int(round(samp_rate/fft_length/1000)))
         self.blocks_integrate_xx_0 = blocks.integrate_ff(100, fft_length)
         self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(fft_length)
+        self.blocks_complex_to_mag_0 = blocks.complex_to_mag(1)
         self.audio_sink_0 = audio.sink(16000, "", True)
-        self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(0.050)
         self.analog_pwr_squelch_xx_0_0 = analog.pwr_squelch_ff(-200, 0.1, 0, True)
         self.analog_pwr_squelch_xx_0 = analog.pwr_squelch_cc(squelch_dB, 0.1, 0, False)
+        self.analog_agc3_xx_0 = analog.agc3_cc(1e-0, 1e-4, 0.1, 10, 1)
+        self.analog_agc3_xx_0.set_max_gain(10000)
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.analog_quadrature_demod_cf_0, 0))    
+        self.connect((self.analog_agc3_xx_0, 0), (self.blocks_complex_to_mag_0, 0))    
+        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.analog_agc3_xx_0, 0))    
         self.connect((self.analog_pwr_squelch_xx_0_0, 0), (self.blocks_wavfile_sink_0, 0))    
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.fir_filter_xxx_0_1, 0))    
+        self.connect((self.blocks_complex_to_mag_0, 0), (self.fir_filter_xxx_0_1, 0))    
         self.connect((self.blocks_complex_to_mag_squared_0, 0), (self.blocks_integrate_xx_0, 0))    
         self.connect((self.blocks_integrate_xx_0, 0), (self.blocks_nlog10_ff_0, 0))    
         self.connect((self.blocks_keep_one_in_n_0, 0), (self.fft_vxx_0, 0))    
@@ -295,7 +296,7 @@ class flow_example(gr.top_block, Qt.QWidget):
         self.connect((self.pfb_arb_resampler_xxx_0, 0), (self.audio_sink_0, 0))    
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "flow_example")
+        self.settings = Qt.QSettings("GNU Radio", "am_flow_example")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
 
@@ -409,15 +410,17 @@ class flow_example(gr.top_block, Qt.QWidget):
 if __name__ == '__main__':
     parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
     (options, args) = parser.parse_args()
-    if(StrictVersion(Qt.qVersion()) >= StrictVersion("4.5.0")):
+    from distutils.version import StrictVersion
+    if StrictVersion(Qt.qVersion()) >= StrictVersion("4.5.0"):
         Qt.QApplication.setGraphicsSystem(gr.prefs().get_string('qtgui','style','raster'))
     qapp = Qt.QApplication(sys.argv)
-    tb = flow_example()
+    tb = am_flow_example()
     tb.start()
     tb.show()
+
     def quitting():
         tb.stop()
         tb.wait()
     qapp.connect(qapp, Qt.SIGNAL("aboutToQuit()"), quitting)
     qapp.exec_()
-    tb = None #to clean up Qt widgets
+    tb = None  # to clean up Qt widgets

@@ -246,8 +246,12 @@ class LockoutWindow(object):
 
         # Draw the lockout channels
         for idx, gui_lockout_channel in enumerate(gui_lockout_channels):
-            text = "   " + gui_lockout_channel
-            self.win.addnstr(idx+1, 1, text, 11)
+            # Don't draw past height of window
+            if idx <= self.dims[0]-3:
+                text = "   " + gui_lockout_channel
+                self.win.addnstr(idx+1, 1, text, 11)
+            else:
+                pass
 
         # Hide cursor
         self.win.leaveok(1)
@@ -316,6 +320,7 @@ class RxWindow(object):
         self.gain_db = 10
         self.squelch_db = -70
         self.volume_db = 0
+        self.type_demod = 0
         self.record = True
         self.lockout_file_name = ""
 
@@ -352,8 +357,10 @@ class RxWindow(object):
         self.win.addnstr(5, 1, text, 15)
         text = "Record        : "
         self.win.addnstr(6, 1, text, 15)
-        text = "Lockout File  : "
+        text = "Demod Type    : "
         self.win.addnstr(7, 1, text, 15)
+        text = "Lockout File  : "
+        self.win.addnstr(8, 1, text, 15)
 
         # Draw the receiver info suffix fields
         text = '{:.3f}'.format((self.center_freq)/1E6)
@@ -368,8 +375,10 @@ class RxWindow(object):
         self.win.addnstr(5, 17, text, 8, curses.color_pair(5))
         text = str(self.record)
         self.win.addnstr(6, 17, text, 8)
+        text = str(self.type_demod)
+        self.win.addnstr(7, 17, text, 8)
         text = str(self.lockout_file_name)
-        self.win.addnstr(7, 17, text, 15)
+        self.win.addnstr(8, 17, text, 15)
 
         # Hide cursor
         self.win.leaveok(1)

@@ -22,6 +22,7 @@ def main(screen):
     Update windows
     Process keyboard strokes
     """
+    # pylint: disable=too-many-statements
 
     # Use the curses.wrapper() to crash cleanly
     # Note the screen object is passed from the wrapper()
@@ -44,11 +45,13 @@ def main(screen):
     # Create scanner object
     ask_samp_rate = PARSER.ask_samp_rate
     num_demod = PARSER.num_demod
+    type_demod = PARSER.type_demod
     hw_args = PARSER.hw_args
     record = PARSER.record
     lockout_file_name = PARSER.lockout_file_name
-    scanner = scnr.Scanner(ask_samp_rate, num_demod, hw_args, record,
-                           lockout_file_name)
+    freq_correction = PARSER.freq_correction
+    scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
+                           freq_correction, record, lockout_file_name)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)
@@ -64,6 +67,7 @@ def main(screen):
     rxwin.squelch_db = scanner.squelch_db
     rxwin.volume_db = scanner.volume_db
     rxwin.record = scanner.record
+    rxwin.type_demod = type_demod
     rxwin.lockout_file_name = scanner.lockout_file_name
     specwin.threshold_db = scanner.threshold_db
 

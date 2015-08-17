@@ -25,7 +25,9 @@ class Scanner(object):
     Args:
         ask_samp_rate (float): Asking sample rate of hardware in sps (1E6 min)
         num_demod (int): Number of parallel demodulators
+        type_demod (int): Type of demodulator (0=NBFM, 1=AM)
         hw_args (string): Argument string to pass to harwdare
+        freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
 
     Attributes:
@@ -45,8 +47,9 @@ class Scanner(object):
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
 
-    def __init__(self, ask_samp_rate=4E6, num_demod=4, hw_args="uhd",
-                 record=True, lockout_file_name=""):
+    def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
+                 hw_args="uhd", freq_correction=0, record=True,
+                 lockout_file_name=""):
         # Default values
         self.gain_db = 30
         self.squelch_db = -60
@@ -61,8 +64,8 @@ class Scanner(object):
         self.lockout_file_name = lockout_file_name
 
         # Create receiver object
-        self.receiver = recvr.Receiver(ask_samp_rate, num_demod, hw_args,
-                                       record)
+        self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
+                                       hw_args, freq_correction, record)
 
         # Get the hardware sample rate and center frequency
         self.samp_rate = self.receiver.samp_rate
@@ -279,11 +282,13 @@ def main():
     # Create scanner object
     ask_samp_rate = parser.ask_samp_rate
     num_demod = parser.num_demod
+    type_demod = parser.type_demod
     hw_args = parser.hw_args
+    freq_correction = parser.freq_correction
     record = parser.record
     lockout_file_name = parser.lockout_file_name
-    scanner = Scanner(ask_samp_rate, num_demod, hw_args, record,
-                      lockout_file_name)
+    scanner = Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
+                      freq_correction, record, lockout_file_name)
 
     # Set frequency, gain, squelch, and volume
     scanner.set_center_freq(parser.center_freq)
@@ -294,9 +299,8 @@ def main():
                                               scanner.gain_db)
     scanner.set_squelch(parser.squelch_db)
     scanner.set_volume(parser.volume_db)
-    print "%d demods at %d dB squelch and %d dB volume" % (num_demod,
-                                                           scanner.squelch_db,
-                                                           scanner.volume_db)
+    print "%d demods of type %d at %d dB squelch and %d dB volume" % \
+        (num_demod, type_demod, scanner.squelch_db, scanner.volume_db)
 
     # Create this epmty list to allow printing to screen
     old_gui_tuned_channels = []

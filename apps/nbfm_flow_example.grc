@@ -13,6 +13,10 @@
       <value></value>
     </param>
     <param>
+      <key>window_size</key>
+      <value>1280, 1024</value>
+    </param>
+    <param>
       <key>category</key>
       <value>Custom</value>
     </param>
@@ -42,7 +46,7 @@
     </param>
     <param>
       <key>id</key>
-      <value>flow_example</value>
+      <value>nbfm_flow_example</value>
     </param>
     <param>
       <key>max_nouts</key>
@@ -66,11 +70,7 @@
     </param>
     <param>
       <key>title</key>
-      <value>Ham2Mon Receiver Flow Example</value>
-    </param>
-    <param>
-      <key>window_size</key>
-      <value>1280, 1024</value>
+      <value>Ham2Mon NBFM Receiver Flow Example</value>
     </param>
   </block>
   <block>

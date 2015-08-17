@@ -23,6 +23,7 @@ class CLParser(object):
         threshold_dB (int): Threshold for channel detection in dB
         record (bool): Record audio to file if True
         lockout_file_name (string): Name of file with channels to lockout
+        freq_correction (int): Frequency correction in ppm
     """
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -39,6 +40,10 @@ class CLParser(object):
         parser.add_option("-n", "--demod", type="int", dest="num_demod",
                           default=4,
                           help="Number of demodulators")
+
+        parser.add_option("-d", "--demodulator", type="int", dest="type_demod",
+                          default=0,
+                          help="Type of demodulator (0=NBFM, 1=AM)")
 
         parser.add_option("-f", "--freq", type="string", dest="center_freq",
                           default=146E6,
@@ -65,18 +70,23 @@ class CLParser(object):
 
         parser.add_option("-w", "--write",
                           dest="record", default=False, action="store_true",
-                          help="Record (write) channles to disk")
+                          help="Record (write) channels to disk")
 
         parser.add_option("-l", "--lockout", type="string",
                           dest="lockout_file_name",
                           default="",
                           help="File of EOL delimited lockout channels in Hz")
 
+        parser.add_option("-c", "--correction", type="int", dest="freq_correction",
+                          default=0,
+                          help="Frequency correction in ppm")
+
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
 
         self.hw_args = str(options.hw_args)
         self.num_demod = int(options.num_demod)
+        self.type_demod = int(options.type_demod)
         self.center_freq = float(options.center_freq)
         self.ask_samp_rate = float(options.ask_samp_rate)
         self.gain_db = float(options.gain_db)
@@ -85,6 +95,7 @@ class CLParser(object):
         self.threshold_db = float(options.threshold_db)
         self.record = bool(options.record)
         self.lockout_file_name = str(options.lockout_file_name)
+        self.freq_correction = int(options.freq_correction)
 
 
 def main():
@@ -98,6 +109,7 @@ def main():
 
     print "hw_args:             " + parser.hw_args
     print "num_demod:           " + str(parser.num_demod)
+    print "type_demod:          " + str(parser.type_demod)
     print "center_freq:         " + str(parser.center_freq)
     print "ask_samp_rate:       " + str(parser.ask_samp_rate)
     print "gain_db:             " + str(parser.gain_db)
@@ -106,6 +118,7 @@ def main():
     print "threshold_db:        " + str(parser.threshold_db)
     print "record:              " + str(parser.record)
     print "lockout_file_name:   " + str(parser.lockout_file_name)
+    print "freq_correction:     " + str(parser.freq_correction)
 
 
 if __name__ == '__main__':
