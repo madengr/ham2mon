@@ -22,6 +22,7 @@ class CLParser(object):
         volume_dB (int): Volume in dB
         threshold_dB (int): Threshold for channel detection in dB
         record (bool): Record audio to file if True
+        play (bool): Play audio through speaker if True
         lockout_file_name (string): Name of file with channels to lockout
         freq_correction (int): Frequency correction in ppm
     """
@@ -81,6 +82,10 @@ class CLParser(object):
                           default=0,
                           help="Frequency correction in ppm")
 
+        parser.add_option("-m", "--mute-audio", dest="play",
+                          action="store_false", default=True,
+                          help="Mute audio from speaker (still allows recording)")
+
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
 
@@ -94,6 +99,7 @@ class CLParser(object):
         self.volume_db = float(options.volume_db)
         self.threshold_db = float(options.threshold_db)
         self.record = bool(options.record)
+        self.play = bool(options.play)
         self.lockout_file_name = str(options.lockout_file_name)
         self.freq_correction = int(options.freq_correction)
 

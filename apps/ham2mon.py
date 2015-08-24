@@ -48,10 +48,11 @@ def main(screen):
     type_demod = PARSER.type_demod
     hw_args = PARSER.hw_args
     record = PARSER.record
+    play = PARSER.play
     lockout_file_name = PARSER.lockout_file_name
     freq_correction = PARSER.freq_correction
     scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
-                           freq_correction, record, lockout_file_name)
+                           freq_correction, record, lockout_file_name, play)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)

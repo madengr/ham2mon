@@ -49,13 +49,14 @@ class Scanner(object):
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
                  hw_args="uhd", freq_correction=0, record=True,
-                 lockout_file_name=""):
+                 lockout_file_name="", play=True):
         # Default values
         self.gain_db = 30
         self.squelch_db = -60
         self.volume_db = 0
         self.threshold_db = 10
         self.record = record
+        self.play = play
         self.spectrum = []
         self.lockout_channels = []
         self.gui_tuned_channels = []
@@ -65,7 +66,7 @@ class Scanner(object):
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
-                                       hw_args, freq_correction, record)
+                                       hw_args, freq_correction, record, play)
 
         # Get the hardware sample rate and center frequency
         self.samp_rate = self.receiver.samp_rate
