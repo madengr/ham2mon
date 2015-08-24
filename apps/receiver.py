@@ -480,23 +480,23 @@ class Receiver(gr.top_block):
                 self.demodulators.append(TunerDemodNBFM(self.samp_rate,
                                                         audio_rate, record))
 
-        # Create an adder
-        add_ff = blocks.add_ff(1)
-
-        # Connect the demodulators between the source and adder
-        for idx, demodulator in enumerate(self.demodulators):
-            self.connect(self.src, demodulator, (add_ff, idx))
-
-        # Connect the blocks for the demod
         if play:
+            # Create an adder
+            add_ff = blocks.add_ff(1)
+
+            # Connect the demodulators between the source and adder
+            for idx, demodulator in enumerate(self.demodulators):
+                self.connect(self.src, demodulator, (add_ff, idx))
+
             # Audio sink
             audio_sink = audio.sink(audio_rate)
 
+            # Connect the summed outputs to the audio sink
             self.connect(add_ff, audio_sink)
         else:
-            null_sink = blocks.null_sink(4)
-
-            self.connect(add_ff, null_sink)
+            # Just connect each demodulator to the receiver source
+            for demodulator in self.demodulators:
+                self.connect(self.src, demodulator)
 
     def set_center_freq(self, center_freq):
         """Sets RF center frequency of hardware
