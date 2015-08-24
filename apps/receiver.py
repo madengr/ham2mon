@@ -403,7 +403,7 @@ class Receiver(gr.top_block):
     # pylint: disable=too-many-arguments
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
-                 hw_args="uhd", freq_correction=0, record=True):
+                 hw_args="uhd", freq_correction=0, record=True, play=True):
         # Call the initialization method from the parent class
         gr.top_block.__init__(self, "Receiver")
 
@@ -480,18 +480,23 @@ class Receiver(gr.top_block):
                 self.demodulators.append(TunerDemodNBFM(self.samp_rate,
                                                         audio_rate, record))
 
-        # Create an adder
-        add_ff = blocks.add_ff(1)
+        if play:
+            # Create an adder
+            add_ff = blocks.add_ff(1)
 
-        # Connect the demodulators between the source and adder
-        for idx, demodulator in enumerate(self.demodulators):
-            self.connect(self.src, demodulator, (add_ff, idx))
+            # Connect the demodulators between the source and adder
+            for idx, demodulator in enumerate(self.demodulators):
+                self.connect(self.src, demodulator, (add_ff, idx))
 
-        # Audio sink
-        audio_sink = audio.sink(audio_rate)
+            # Audio sink
+            audio_sink = audio.sink(audio_rate)
 
-         # Connect the blocks for the demod
-        self.connect(add_ff, audio_sink)
+            # Connect the summed outputs to the audio sink
+            self.connect(add_ff, audio_sink)
+        else:
+            # Just connect each demodulator to the receiver source
+            for demodulator in self.demodulators:
+                self.connect(self.src, demodulator)
 
     def set_center_freq(self, center_freq):
         """Sets RF center frequency of hardware
@@ -562,8 +567,9 @@ def main():
     hw_args = "uhd"
     freq_correction = 0
     record = False
+    play = True
     receiver = Receiver(ask_samp_rate, num_demod, type_demod, hw_args,
-                        freq_correction, record)
+                        freq_correction, record, play)
 
     # Start the receiver and wait for samples to accumulate
     receiver.start()
