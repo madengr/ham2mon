@@ -73,10 +73,6 @@ class BaseTuner(gr.hier_block2):
             self.file_name == '/dev/null'):
             return
 
-        with open('/tmp/test', 'a') as inp:
-            inp.write(str(self.file_name) + ' ')
-            inp.write(str(os.stat(self.file_name).st_size) + '\n')
-
         # If we never wrote any data to the wavfile sink, delete
         # the (empty) wavfile
         if os.stat(self.file_name).st_size in (44, 0):   # ugly hack
