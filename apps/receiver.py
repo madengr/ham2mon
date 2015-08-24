@@ -14,11 +14,91 @@ from gnuradio import fft
 from gnuradio.fft import window
 from gnuradio import analog
 from gnuradio import audio
+import os
 import time
 import numpy as np
 from gnuradio.filter import pfb
 
-class TunerDemodNBFM(gr.hier_block2):
+class BaseTuner(gr.hier_block2):
+    """Some base methods that are the same between the known tuner types.
+
+    See TunerDemodNBFM and TunerDemodAM for better documentation.
+    """
+
+    def set_center_freq(self, center_freq, rf_center_freq):
+        """Sets baseband center frequency and file name
+
+        Sets baseband center frequency of frequency translating FIR filter
+        Also sets file name of wave file sink
+        If tuner is tuned to zero Hz then set to file name to /dev/null
+        Otherwise set file name to tuned RF frequency in MHz
+
+        Args:
+            center_freq (float): Baseband center frequency in Hz
+            rf_center_freq (float): RF center in Hz (for file name)
+        """
+        # Since the frequency (hence file name) changed, then close it
+        self.blocks_wavfile_sink.close()
+
+        # If we never wrote any data to the wavfile sink, delete the file
+        self._delete_wavfile_if_empty()
+
+        # Set the frequency
+        self.freq_xlating_fir_filter_ccc.set_center_freq(center_freq)
+        self.center_freq = center_freq
+
+        # Set the file name
+        if self.center_freq == 0 or not self.record:
+            # If tuner at zero Hz, or record false, then file name to /dev/null
+            file_name = "/dev/null"
+        else:
+            # Otherwise use frequency and time stamp for file name
+            tstamp = "_" + str(int(time.time()))
+            file_freq = (rf_center_freq + self.center_freq)/1E6
+            file_freq = np.round(file_freq, 3)
+            file_name = 'wav/' + '{:.3f}'.format(file_freq) + tstamp + ".wav"
+
+            # Make sure the 'wav' directory exists
+            try:
+                os.mkdir('wav')
+            except OSError:  # will need to add something here for Win support
+                pass  # directory already exists
+
+        self.file_name = file_name
+        self.blocks_wavfile_sink.open(self.file_name)
+
+    def _delete_wavfile_if_empty(self):
+        """Delete the current wavfile if it's empty."""
+        if (not self.record or not self.file_name or
+            self.file_name == '/dev/null'):
+            return
+
+        with open('/tmp/test', 'a') as inp:
+            inp.write(str(self.file_name) + ' ')
+            inp.write(str(os.stat(self.file_name).st_size) + '\n')
+
+        # If we never wrote any data to the wavfile sink, delete
+        # the (empty) wavfile
+        if os.stat(self.file_name).st_size in (44, 0):   # ugly hack
+            os.unlink(self.file_name)  # delete the file
+
+    def set_squelch(self, squelch_db):
+        """Sets the threshold for both squelches
+
+        Args:
+            squelch_db (float): Squelch in dB
+        """
+        self.analog_pwr_squelch_cc.set_threshold(squelch_db)
+
+    def __del__(self):
+        """Called when the object is destroyed."""
+        # Make a best effort attempt to clean up our wavfile if it's empty
+        try:
+            self._delete_wavfile_if_empty()
+        except Exception:
+            pass  # oh well, we're dying anyway
+
+class TunerDemodNBFM(BaseTuner):
     """Tuner, demodulator, and recorder chain for narrow band FM demodulation
 
     Kept as it's own class so multiple can be instantiated in parallel
@@ -142,48 +222,6 @@ class TunerDemodNBFM(gr.hier_block2):
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
         self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
 
-    def set_center_freq(self, center_freq, rf_center_freq):
-        """Sets baseband center frequency and file name
-
-        Sets baseband center frequency of frequency translating FIR filter
-        Also sets file name of wave file sink
-        If tuner is tuned to zero Hz then set to file name to /dev/null
-        Otherwise set file name to tuned RF frequency in MHz
-
-        Args:
-            center_freq (float): Baseband center frequency in Hz
-            rf_center_freq (float): RF center in Hz (for file name)
-        """
-        # Since the frequency (hence file name) changed, then close it
-        self.blocks_wavfile_sink.close()
-
-        # Set the frequency
-        self.freq_xlating_fir_filter_ccc.set_center_freq(center_freq)
-        self.center_freq = center_freq
-
-        # Set the file name
-        if (self.center_freq == 0) or (self.record == False):
-            # If tuner at zero Hz, or record false, then file name to /dev/null
-            file_name = "/dev/null"
-        else:
-            # Otherwise use frequency and time stamp for file name
-            tstamp = "_" + str(int(time.time()))
-            file_freq = (rf_center_freq + self.center_freq)/1E6
-            file_freq = np.round(file_freq, 3)
-            file_name = 'wav/' + '{:.3f}'.format(file_freq) + tstamp + ".wav"
-
-        self.file_name = file_name
-        self.blocks_wavfile_sink.open(self.file_name)
-
-
-    def set_squelch(self, squelch_db):
-        """Sets the threshold for both squelches
-
-        Args:
-            squelch_db (float): Squelch in dB
-        """
-        self.analog_pwr_squelch_cc.set_threshold(squelch_db)
-
     def set_volume(self, volume_db):
         """Sets the volume
 
@@ -193,8 +231,7 @@ class TunerDemodNBFM(gr.hier_block2):
         gain = self.quad_demod_gain * 10**(volume_db/20.0)
         self.analog_quadrature_demod_cf.set_gain(gain)
 
-
-class TunerDemodAM(gr.hier_block2):
+class TunerDemodAM(BaseTuner):
     """Tuner, demodulator, and recorder chain for AM demodulation
 
     Kept as it's own class so multiple can be instantiated in parallel
@@ -325,48 +362,6 @@ class TunerDemodAM(gr.hier_block2):
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
         self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
 
-    def set_center_freq(self, center_freq, rf_center_freq):
-        """Sets baseband center frequency and file name
-
-        Sets baseband center frequency of frequency translating FIR filter
-        Also sets file name of wave file sink
-        If tuner is tuned to zero Hz then set to file name to /dev/null
-        Otherwise set file name to tuned RF frequency in MHz
-
-        Args:
-            center_freq (float): Baseband center frequency in Hz
-            rf_center_freq (float): RF center in Hz (for file name)
-        """
-        # Since the frequency (hence file name) changed, then close it
-        self.blocks_wavfile_sink.close()
-
-        # Set the frequency
-        self.freq_xlating_fir_filter_ccc.set_center_freq(center_freq)
-        self.center_freq = center_freq
-
-        # Set the file name
-        if (self.center_freq == 0) or (self.record == False):
-            # If tuner at zero Hz, or record false, then file name to /dev/null
-            file_name = "/dev/null"
-        else:
-            # Otherwise use frequency and time stamp for file name
-            tstamp = "_" + str(int(time.time()))
-            file_freq = (rf_center_freq + self.center_freq)/1E6
-            file_freq = np.round(file_freq, 3)
-            file_name = 'wav/' + '{:.3f}'.format(file_freq) + tstamp + ".wav"
-
-        self.file_name = file_name
-        self.blocks_wavfile_sink.open(self.file_name)
-
-
-    def set_squelch(self, squelch_db):
-        """Sets the threshold for both squelches
-
-        Args:
-            squelch_db (float): Squelch in dB
-        """
-        self.analog_pwr_squelch_cc.set_threshold(squelch_db)
-
     def set_volume(self, volume_db):
         """Sets the volume
 
@@ -375,7 +370,6 @@ class TunerDemodAM(gr.hier_block2):
         """
         agc_ref = self.agc_ref * 10**(volume_db/20.0)
         self.agc3_cc.set_reference(agc_ref)
-
 
 class Receiver(gr.top_block):
     """Receiver for narrow band frequency modulation
