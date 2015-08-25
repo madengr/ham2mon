@@ -19,6 +19,12 @@ atpage:
 
 john:
 - Added frequency correction option switch
+- Added read from I/Q file documentation
+
+lachesis:
+- Added mute switch
+- Simplified TuderDemod class
+- Removed 44 byte header-only files
 
 madengr:
 - Initial code
