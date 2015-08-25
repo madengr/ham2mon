@@ -38,6 +38,10 @@ The following is an example of the option switches for RTL2832U.  Note the sampl
 
 ./ham2mon.py -a "rtl" -n 4 -f 145E6 -r 2E6 -g 20 -s -40 -v 0 -t 30 -w
 
+Example of reading from an IQ file:
+
+./ham2mon.py -a "file=gqrx.raw,rate=8E6,repeat=false,throttle=true,freq=466E6" -r 8E6 -w
+
 ##GUI Controls:
 
 `t/r = Detection threshold +/- 5 dB`
