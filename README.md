@@ -23,7 +23,7 @@ john:
 
 lachesis:
 - Mute switch
-- Simplified TuderDemod class
+- Simplified TunerDemod class
 - Removed 44 byte header-only files
 
 madengr:
