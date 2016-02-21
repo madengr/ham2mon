@@ -8,9 +8,9 @@ http://youtu.be/BXptQFSV8E4
 ##Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
-- GNU Radio 3.7.8 (https://github.com/gnuradio/gnuradio)
+- GNU Radio 3.7.10 (https://github.com/gnuradio/gnuradio)
 - GrOsmoSDR 0.1.4 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
-- Ettus UHD 3.9.0 (https://github.com/EttusResearch/uhd)
+- Ettus UHD 3.10.0 (https://github.com/EttusResearch/uhd)
 
 ##Contributors:
 
@@ -18,17 +18,18 @@ atpage:
 - Fixed typos
 
 john:
-- Added frequency correction option switch
-- Added read from I/Q file documentation
+- Frequency correction option switch
+- Read from I/Q file documentation
 
 lachesis:
-- Added mute switch
+- Mute switch
 - Simplified TuderDemod class
 - Removed 44 byte header-only files
 
 madengr:
 - Initial code
-- AM demodulation 
+- AM demodulation
+- Priority channels 
 
 ##Console Operation:
 
@@ -87,7 +88,7 @@ The demodulator blocks are put into a hierarchical GR block so multiple can be i
 
 The scanner.py contains the control code, and may be run on on it's own non-interactively.  It instantiates the receiver.py with N demodulators and probes the average spectrum at ~10 Hz.  The spectrum is processed with estimate.py, which takes a weighted average of the spectrum bins that are above a threshold.  This weighted average does a fair job of estimating the modulated channel center to sub-kHz resolution given the RBW is several kHz.  The estimate.py returns a list of baseband channels that are rounded to the nearest 5 kHz (for NBFM band plan ambiguity).
 
-The lockout channels are removed from the list, and the list used to tune the demodulators.  The demodulators are only tuned if the channel has ceased activity from the last probe, otherwise the demodulator is held on the channel.  The demodulators are parked at 0 Hz baseband when not tuned, as this provides a constant, low amplitude signal due to FM demod of LO leakage.
+The lockout channels are removed from the list, priority channels bumped to the front, and the list used to tune the demodulators.  The demodulators are only tuned if the channel has ceased activity from the last probe, otherwise the demodulator is held on the channel.  Files, thus time stamps, are only re-written when the demodulator has moved, therefore priority channels are only time stamped at program start.  The demodulators are parked at 0 Hz baseband when not tuned, as this provides a constant, low amplitude signal due to FM demod of LO leakage.
 
 The ham2mon.py interfaces the scanner.py with the curses.py GUI.  The GUI provides a spectral display with adjustable scaling and detector threshold line.  The center frequency, gain, squelch, and volume can be adjusted in real time, as well as adding channel lockouts.  The hardware arguments, sample rate, number of demodulators, recording status, and lockout file are set via switches at run time.
 

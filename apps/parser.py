@@ -24,6 +24,7 @@ class CLParser(object):
         record (bool): Record audio to file if True
         play (bool): Play audio through speaker if True
         lockout_file_name (string): Name of file with channels to lockout
+        priority_file_name (string): Name of file with channels to for priority
         freq_correction (int): Frequency correction in ppm
     """
     # pylint: disable=too-few-public-methods
@@ -78,6 +79,11 @@ class CLParser(object):
                           default="",
                           help="File of EOL delimited lockout channels in Hz")
 
+        parser.add_option("-p", "--priority", type="string",
+                          dest="priority_file_name",
+                          default="",
+                          help="File of EOL delimited priority channels in Hz")
+
         parser.add_option("-c", "--correction", type="int", dest="freq_correction",
                           default=0,
                           help="Frequency correction in ppm")
@@ -101,6 +107,7 @@ class CLParser(object):
         self.record = bool(options.record)
         self.play = bool(options.play)
         self.lockout_file_name = str(options.lockout_file_name)
+        self.priority_file_name = str(options.priority_file_name)
         self.freq_correction = int(options.freq_correction)
 
 
@@ -124,6 +131,7 @@ def main():
     print "threshold_db:        " + str(parser.threshold_db)
     print "record:              " + str(parser.record)
     print "lockout_file_name:   " + str(parser.lockout_file_name)
+    print "priority_file_name:  " + str(parser.priority_file_name)
     print "freq_correction:     " + str(parser.freq_correction)
 
 

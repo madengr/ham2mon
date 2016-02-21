@@ -39,17 +39,19 @@ class Scanner(object):
         threshold_dB (int): Threshold for channel detection in dB
         spectrum (numpy.ndarray): FFT power spectrum data in linear, not dB
         lockout_channels [float]: List of baseband lockout channels in Hz
+        priority_channels [float]: List of baseband priority channels in Hz
         gui_tuned_channels [str] List of tuned RF channels in MHz for GUI
         gui_tuned_lockout_channels [str]: List of lockout channels in MHz GUI
         channel_spacing (float):  Spacing that channels will be rounded
         lockout_file_name (string): Name of file with channels to lockout
+        priority_file_name (string): Name of file with channels for priority
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
                  hw_args="uhd", freq_correction=0, record=True,
-                 lockout_file_name="", play=True):
+                 lockout_file_name="", priority_file_name="", play=True):
         # Default values
         self.gain_db = 30
         self.squelch_db = -60
@@ -59,10 +61,12 @@ class Scanner(object):
         self.play = play
         self.spectrum = []
         self.lockout_channels = []
+        self.priority_channels = []
         self.gui_tuned_channels = []
         self.gui_lockout_channels = []
         self.channel_spacing = 5000
         self.lockout_file_name = lockout_file_name
+        self.priority_file_name = priority_file_name
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
@@ -82,6 +86,8 @@ class Scanner(object):
         Should be called no more than 10 Hz rate
         Estimates channels from FFT power spectrum that are above threshold
         Rounds channels to nearest 5 kHz
+        Removes channels that are already a priority
+        Moves priority channels in front
         Removes channels that are locked out
         Tunes demodulators to new channels
         Holds demodulators on channels between scan cycles
@@ -110,6 +116,18 @@ class Scanner(object):
         # Note this affects tuning the demodulators
         # 5000 Hz is adequate for NBFM
         channels = np.round(channels / self.channel_spacing) * self.channel_spacing
+
+        # Remove channels that are already in the priority list
+        temp = []
+        for channel in channels:
+            if channel not in self.priority_channels:
+                temp = np.append(temp, channel)
+            else:
+                pass
+        channels = temp
+
+        # Put the priority channels in front
+        channels = np.append(self.priority_channels, channels)
 
         # Remove channels that are locked out
         temp = []
@@ -193,10 +211,10 @@ class Scanner(object):
                 lines = __builtin__.filter(None, lines)
             # Convert to baseband frequencies, round, and append
             for freq in lines:
-                rf_freq = float(freq) - self.center_freq
-                rf_freq = round(rf_freq/self.channel_spacing)*\
+                bb_freq = float(freq) - self.center_freq
+                bb_freq = round(bb_freq/self.channel_spacing)*\
                                         self.channel_spacing
-                self.lockout_channels.append(rf_freq)
+                self.lockout_channels.append(bb_freq)
         else:
             pass
 
@@ -208,6 +226,31 @@ class Scanner(object):
             text = '{:.3f}'.format(gui_lockout_channel)
             self.gui_lockout_channels.append(text)
 
+    def update_priority(self):
+        """Updates priority channels
+        """
+        # Clear the priority channels
+        self.priority_channels = []
+
+        # Process priority file if it was provided
+        if self.priority_file_name != "":
+            # Open file, split to list, remove empty strings
+            with open(self.priority_file_name) as priority_file:
+                lines = priority_file.read().splitlines()
+                priority_file.close()
+                lines = __builtin__.filter(None, lines)
+            # Convert to baseband frequencies, round, and append if within BW
+            for freq in lines:
+                bb_freq = float(freq) - self.center_freq
+                bb_freq = round(bb_freq/self.channel_spacing)*\
+                                        self.channel_spacing
+                if abs(bb_freq) <= self.samp_rate/2.0:
+                    self.priority_channels.append(bb_freq)
+                else:
+                    pass
+        else:
+            pass
+
     def set_center_freq(self, center_freq):
         """Sets RF center frequency of hardware and clears lockout channels
 
@@ -217,6 +260,9 @@ class Scanner(object):
         # Tune the receiver then update with actual frequency
         self.receiver.set_center_freq(center_freq)
         self.center_freq = self.receiver.center_freq
+
+        # Update the priority since frequency is changing
+        self.update_priority()
 
         # Clear the lockout since frequency is changing
         self.clear_lockout()
@@ -288,8 +334,10 @@ def main():
     freq_correction = parser.freq_correction
     record = parser.record
     lockout_file_name = parser.lockout_file_name
+    priority_file_name = parser.priority_file_name
     scanner = Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
-                      freq_correction, record, lockout_file_name)
+                      freq_correction, record, lockout_file_name,
+                      priority_file_name)
 
     # Set frequency, gain, squelch, and volume
     scanner.set_center_freq(parser.center_freq)
