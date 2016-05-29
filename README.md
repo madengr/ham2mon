@@ -20,6 +20,7 @@ atpage:
 john:
 - Frequency correction option switch
 - Read from I/Q file documentation
+- Bits per audio sample (bps) option switch
 
 lachesis:
 - Mute switch
@@ -29,7 +30,7 @@ lachesis:
 madengr:
 - Initial code
 - AM demodulation
-- Priority channels 
+- Priority channels
 
 ##Console Operation:
 
@@ -44,6 +45,10 @@ The following is an example of the option switches for UHD with AM demodulation,
 The following is an example of the option switches for RTL2832U.  Note the sample rate, squelch, and threshold have changed to reflect the reduced (8-bit) dynamic range of the RTL dongles compared to Ettus SDRs.  In addition, these devices have poor IMD and image suppression, so strong signals may cause false demodulator locks:
 
 ./ham2mon.py -a "rtl" -n 4 -f 145E6 -r 2E6 -g 20 -s -40 -v 0 -t 30 -w
+
+Note that sometimes default RTL kernel driver (for receiving video) must be disabled.  Google "rtl sdr blacklist" to read more about this issue, or just do this:
+
+sudo rmmod dvb_usb_rtl28xxu
 
 Example of reading from an IQ file:
 
@@ -95,4 +100,3 @@ The ham2mon.py interfaces the scanner.py with the curses.py GUI.  The GUI provid
 The default settings are optimized for an Ettus B200.  The RTL dongle will require raising the squelch and adjustment of the spectrum scale and threshold.
 
 The next iteration of this program will probably use gr-dsd to decode P25 public safety in the 800 MHz band.
-
