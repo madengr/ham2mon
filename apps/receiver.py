@@ -115,7 +115,7 @@ class TunerDemodNBFM(BaseTuner):
     This 8 ksps audio stream may be added to other demos streams
     The audio is run through an additional blocking squelch at -200 dB
     This stops the sample flow so squelced audio is not recorded to file
-    The wav file sink stores 8-bit samples (grainy quality but compact)
+    The wav file sink stores 8-bit samples (default/grainy quality but compact)
     Default demodulator center freqwuency is 0 Hz
     This is desired since hardware DC removal reduces sensitivity at 0 Hz
     NBFM demod of LO leakage will just be 0 amplitude
@@ -131,7 +131,7 @@ class TunerDemodNBFM(BaseTuner):
     """
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True):
+    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True, audio_bps=8):
         gr.hier_block2.__init__(self, "TunerDemodNBFM",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(1, 1, gr.sizeof_float))
@@ -210,9 +210,9 @@ class TunerDemodNBFM(BaseTuner):
         # Only want it to gate when the previuos squelch has gone to zero
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
-        # File sink with single channel and 8 bits/sample
+        # File sink with single channel and bits/sample
         self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, 8)
+                                                       audio_rate, audio_bps)
 
         # Connect the blocks for recording
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
@@ -249,7 +249,7 @@ class TunerDemodAM(BaseTuner):
     This 8 ksps audio stream may be added to other demos streams
     The audio is run through an additional blocking squelch at -200 dB
     This stops the sample flow so squelced audio is not recorded to file
-    The wav file sink stores 8-bit samples (grainy quality but compact)
+    The wav file sink stores 8-bit samples (default/grainy quality but compact)
     Default demodulator center freqwuency is 0 Hz
     This is desired since hardware DC removal reduces sensitivity at 0 Hz
     AM demod of LO leakage will just be 0 amplitude
@@ -266,7 +266,7 @@ class TunerDemodAM(BaseTuner):
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-locals
 
-    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True):
+    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True, audio_bps=8):
         gr.hier_block2.__init__(self, "TunerDemodAM",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(1, 1, gr.sizeof_float))
@@ -352,7 +352,7 @@ class TunerDemodAM(BaseTuner):
 
         # File sink with single channel and 8 bits/sample
         self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, 8)
+                                                       audio_rate, audio_bps)
 
         # Connect the blocks for recording
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
@@ -380,6 +380,7 @@ class Receiver(gr.top_block):
         hw_args (string): Argument string to pass to harwdare
         freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
+        audio_bps (int): Audio bit depth in bps
 
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
@@ -393,7 +394,7 @@ class Receiver(gr.top_block):
     # pylint: disable=too-many-arguments
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
-                 hw_args="uhd", freq_correction=0, record=True, play=True):
+                 hw_args="uhd", freq_correction=0, record=True, play=True, audio_bps=8):
         # Call the initialization method from the parent class
         gr.top_block.__init__(self, "Receiver")
 
@@ -465,10 +466,10 @@ class Receiver(gr.top_block):
         for idx in range(num_demod):
             if type_demod == 1:
                 self.demodulators.append(TunerDemodAM(self.samp_rate,
-                                                      audio_rate, record))
+                                                      audio_rate, record, audio_bps))
             else:
                 self.demodulators.append(TunerDemodNBFM(self.samp_rate,
-                                                        audio_rate, record))
+                                                        audio_rate, record, audio_bps))
 
         if play:
             # Create an adder
@@ -558,8 +559,9 @@ def main():
     freq_correction = 0
     record = False
     play = True
+    audio_bps = 8
     receiver = Receiver(ask_samp_rate, num_demod, type_demod, hw_args,
-                        freq_correction, record, play)
+                        freq_correction, record, play, audio_bps)
 
     # Start the receiver and wait for samples to accumulate
     receiver.start()
