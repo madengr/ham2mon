@@ -46,7 +46,7 @@ The following is an example of the option switches for RTL2832U.  Note the sampl
 
 ./ham2mon.py -a "rtl" -n 4 -f 145E6 -r 2E6 -g 20 -s -40 -v 0 -t 30 -w
 
-Note that sometimes default RTL kernel driver (for receiving video) must be disabled.  Google "rtl sdr blacklist" to read more about this issue, or just do this:
+Note that sometimes default RTL kernel driver (for receiving dvb) must be disabled.  Google "rtl sdr blacklist" to read more about this issue, or just do this:
 
 sudo rmmod dvb_usb_rtl28xxu
 
@@ -64,7 +64,7 @@ Example of reading from an IQ file:
 
 `g/f = RF gain +/- 10 dB`
 
-`s/a = Squelch +/- 5 dB`
+`s/a = Squelch +/- 1 dB`
 
 `./, = Volume +/- 1 dB`
 

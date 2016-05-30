@@ -440,7 +440,7 @@ class RxWindow(object):
         """Process keystrokes to adjust soft receiver settings
 
         Tune gain_db in 10 dB steps with 'g' and 'f'
-        Tune squelch_db in 10 dB steps with 's' and 'a'
+        Tune squelch_db in 1 dB steps with 's' and 'a'
         Tune volume_db in 1 dB steps with '.' and ','
 
         Args:
@@ -459,12 +459,12 @@ class RxWindow(object):
         elif keyb == ord('f'):
             self.gain_db -= 10
             return True
-        # Tune self.squelch_db in 5 dB steps with 's' and 'a'
+        # Tune self.squelch_db in 1 dB steps with 's' and 'a'
         elif keyb == ord('s'):
-            self.squelch_db += 5
+            self.squelch_db += 1
             return True
         elif keyb == ord('a'):
-            self.squelch_db -= 5
+            self.squelch_db -= 1
             return True
         # Tune self.volume_db in 1 dB steps with '.' and ','
         elif keyb == ord('.'):
