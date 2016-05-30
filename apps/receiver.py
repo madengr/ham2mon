@@ -70,7 +70,7 @@ class BaseTuner(gr.hier_block2):
     def _delete_wavfile_if_empty(self):
         """Delete the current wavfile if it's empty."""
         if (not self.record or not self.file_name or
-            self.file_name == '/dev/null'):
+                self.file_name == '/dev/null'):
             return
 
         # If we never wrote any data to the wavfile sink, delete
@@ -107,16 +107,16 @@ class TunerDemodNBFM(BaseTuner):
     Thus output rate will vary from 40 ksps to 79.99 ksps
     The channel is filtered to 12.5 KHz bandwidth followed by squelch
     The squelch is non-blocking since samples will be added with other demods
-    The quadrature demod is followed by a forth stage of decimation by 5
+    The quadrature demod is followed by a fourth stage of decimation by 5
     This brings the sample rate down to 8 ksps to 15.98 ksps
     The audio is low-pass filtered to 3.5 kHz bandwidth
     The polyphase resampler resamples by samp_rate/(decims[1] * decims[0]**3)
     This results in a constant 8 ksps, irrespective of RF sample rate
-    This 8 ksps audio stream may be added to other demos streams
+    This 8 ksps audio stream may be added to other demod streams
     The audio is run through an additional blocking squelch at -200 dB
-    This stops the sample flow so squelced audio is not recorded to file
+    This stops the sample flow so squelched audio is not recorded to file
     The wav file sink stores 8-bit samples (default/grainy quality but compact)
-    Default demodulator center freqwuency is 0 Hz
+    Default demodulator center frequency is 0 Hz
     This is desired since hardware DC removal reduces sensitivity at 0 Hz
     NBFM demod of LO leakage will just be 0 amplitude
 
@@ -207,7 +207,7 @@ class TunerDemodNBFM(BaseTuner):
         self.connect(pfb_arb_resampler_fff, self)
 
         # Need to set this to a very low value of -200 since it is after demod
-        # Only want it to gate when the previuos squelch has gone to zero
+        # Only want it to gate when the previous squelch has gone to zero
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
         # File sink with single channel and bits/sample
@@ -241,16 +241,16 @@ class TunerDemodAM(BaseTuner):
     The channel is filtered to 12.5 KHz bandwidth followed by squelch
     The squelch is non-blocking since samples will be added with other demods
     The AGC sets level (volume) prior to AM demod
-    The AM demod is followed by a forth stage of decimation by 5
+    The AM demod is followed by a fourth stage of decimation by 5
     This brings the sample rate down to 8 ksps to 15.98 ksps
     The audio is low-pass filtered to 3.5 kHz bandwidth
     The polyphase resampler resamples by samp_rate/(decims[1] * decims[0]**3)
     This results in a constant 8 ksps, irrespective of RF sample rate
-    This 8 ksps audio stream may be added to other demos streams
+    This 8 ksps audio stream may be added to other demod streams
     The audio is run through an additional blocking squelch at -200 dB
     This stops the sample flow so squelced audio is not recorded to file
     The wav file sink stores 8-bit samples (default/grainy quality but compact)
-    Default demodulator center freqwuency is 0 Hz
+    Default demodulator center frequency is 0 Hz
     This is desired since hardware DC removal reduces sensitivity at 0 Hz
     AM demod of LO leakage will just be 0 amplitude
 
@@ -347,7 +347,7 @@ class TunerDemodAM(BaseTuner):
         self.connect(pfb_arb_resampler_fff, self)
 
         # Need to set this to a very low value of -200 since it is after demod
-        # Only want it to gate when the previuos squelch has gone to zero
+        # Only want it to gate when the previous squelch has gone to zero
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
         # File sink with single channel and 8 bits/sample
@@ -377,7 +377,7 @@ class Receiver(gr.top_block):
         ask_samp_rate (float): Asking sample rate of hardware in sps (1E6 min)
         num_demod (int): Number of parallel demodulators
         type_demod (int): Type of demodulator (0=NBFM, 1=AM)
-        hw_args (string): Argument string to pass to harwdare
+        hw_args (string): Argument string to pass to hardware
         freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
         audio_bps (int): Audio bit depth in bps
@@ -394,7 +394,9 @@ class Receiver(gr.top_block):
     # pylint: disable=too-many-arguments
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
-                 hw_args="uhd", freq_correction=0, record=True, play=True, audio_bps=8):
+                 hw_args="uhd", freq_correction=0, record=True, play=True,
+                 audio_bps=8):
+
         # Call the initialization method from the parent class
         gr.top_block.__init__(self, "Receiver")
 
@@ -466,10 +468,12 @@ class Receiver(gr.top_block):
         for idx in range(num_demod):
             if type_demod == 1:
                 self.demodulators.append(TunerDemodAM(self.samp_rate,
-                                                      audio_rate, record, audio_bps))
+                                                      audio_rate, record,
+                                                      audio_bps))
             else:
                 self.demodulators.append(TunerDemodNBFM(self.samp_rate,
-                                                        audio_rate, record, audio_bps))
+                                                        audio_rate, record,
+                                                        audio_bps))
 
         if play:
             # Create an adder
