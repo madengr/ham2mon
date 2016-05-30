@@ -29,7 +29,7 @@ class Scanner(object):
         hw_args (string): Argument string to pass to harwdare
         freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
-        audio_bps (int): Audio bit depth on bps
+        audio_bps (int): Audio bit depth in bps (bits/samples)
 
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
@@ -52,7 +52,9 @@ class Scanner(object):
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
                  hw_args="uhd", freq_correction=0, record=True,
-                 lockout_file_name="", priority_file_name="", play=True, audio_bps=8):
+                 lockout_file_name="", priority_file_name="", play=True,
+                 audio_bps=8):
+
         # Default values
         self.gain_db = 30
         self.squelch_db = -60
@@ -71,7 +73,8 @@ class Scanner(object):
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
-                                       hw_args, freq_correction, record, play, audio_bps)
+                                       hw_args, freq_correction, record, play,
+                                       audio_bps)
 
         # Get the hardware sample rate and center frequency
         self.samp_rate = self.receiver.samp_rate

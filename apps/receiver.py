@@ -124,6 +124,7 @@ class TunerDemodNBFM(BaseTuner):
         samp_rate (float): Input baseband sample rate in sps (1E6 minimum)
         audio_rate (float): Output audio sample rate in sps (8 kHz minimum)
         record (bool): Record audio to file if True
+        audio_bps (int): Audio bit depth in bps (bits/samples)
 
     Attributes:
         center_freq (float): Baseband center frequency in Hz
@@ -131,7 +132,8 @@ class TunerDemodNBFM(BaseTuner):
     """
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True, audio_bps=8):
+    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True,
+                 audio_bps=8):
         gr.hier_block2.__init__(self, "TunerDemodNBFM",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(1, 1, gr.sizeof_float))
@@ -258,6 +260,7 @@ class TunerDemodAM(BaseTuner):
         samp_rate (float): Input baseband sample rate in sps (1E6 minimum)
         audio_rate (float): Output audio sample rate in sps (8 kHz minimum)
         record (bool): Record audio to file if True
+        audio_bps (int): Audio bit depth in bps (bits/samples)
 
     Attributes:
         center_freq (float): Baseband center frequency in Hz
@@ -266,7 +269,8 @@ class TunerDemodAM(BaseTuner):
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-locals
 
-    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True, audio_bps=8):
+    def __init__(self, samp_rate=4E6, audio_rate=8000, record=True,
+                 audio_bps=8):
         gr.hier_block2.__init__(self, "TunerDemodAM",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(1, 1, gr.sizeof_float))
@@ -368,7 +372,7 @@ class TunerDemodAM(BaseTuner):
         self.agc3_cc.set_reference(agc_ref)
 
 class Receiver(gr.top_block):
-    """Receiver for narrow band frequency modulation
+    """Receiver for NBFM and AM modulation
 
     Controls hardware and instantiates multiple tuner/demodulators
     Generates FFT power spectrum for channel estimation
@@ -380,7 +384,7 @@ class Receiver(gr.top_block):
         hw_args (string): Argument string to pass to hardware
         freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
-        audio_bps (int): Audio bit depth in bps
+        audio_bps (int): Audio bit depth in bps (bits/samples)
 
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
