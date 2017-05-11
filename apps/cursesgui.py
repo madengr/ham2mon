@@ -308,6 +308,7 @@ class RxWindow(object):
         volume_dB (int): Volume in dB
         record (bool): Record audio to file if True
         lockout_file_name (string): Name of file with channels to lockout
+        priority_file_name (string): Name of file with channels for priority
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -323,6 +324,7 @@ class RxWindow(object):
         self.type_demod = 0
         self.record = True
         self.lockout_file_name = ""
+        self.priority_file_name = ""
 
         # Create a window object in the bottom half of the screen
         # Make it about 1/3 the screen width
@@ -359,7 +361,7 @@ class RxWindow(object):
         self.win.addnstr(6, 1, text, 15)
         text = "Demod Type    : "
         self.win.addnstr(7, 1, text, 15)
-        text = "Lockout File  : "
+        text = "Files         : "
         self.win.addnstr(8, 1, text, 15)
 
         # Draw the receiver info suffix fields
@@ -377,8 +379,8 @@ class RxWindow(object):
         self.win.addnstr(6, 17, text, 8)
         text = str(self.type_demod)
         self.win.addnstr(7, 17, text, 8)
-        text = str(self.lockout_file_name)
-        self.win.addnstr(8, 17, text, 15)
+        text = str(self.lockout_file_name) + " " + str(self.priority_file_name)
+        self.win.addnstr(8, 17, text, 20)
 
         # Hide cursor
         self.win.leaveok(1)
@@ -438,7 +440,7 @@ class RxWindow(object):
         """Process keystrokes to adjust soft receiver settings
 
         Tune gain_db in 10 dB steps with 'g' and 'f'
-        Tune squelch_db in 10 dB steps with 's' and 'a'
+        Tune squelch_db in 1 dB steps with 's' and 'a'
         Tune volume_db in 1 dB steps with '.' and ','
 
         Args:
@@ -457,12 +459,12 @@ class RxWindow(object):
         elif keyb == ord('f'):
             self.gain_db -= 10
             return True
-        # Tune self.squelch_db in 5 dB steps with 's' and 'a'
+        # Tune self.squelch_db in 1 dB steps with 's' and 'a'
         elif keyb == ord('s'):
-            self.squelch_db += 5
+            self.squelch_db += 1
             return True
         elif keyb == ord('a'):
-            self.squelch_db -= 5
+            self.squelch_db -= 1
             return True
         # Tune self.volume_db in 1 dB steps with '.' and ','
         elif keyb == ord('.'):

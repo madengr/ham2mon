@@ -22,8 +22,11 @@ class CLParser(object):
         volume_dB (int): Volume in dB
         threshold_dB (int): Threshold for channel detection in dB
         record (bool): Record audio to file if True
+        play (bool): Play audio through speaker if True
         lockout_file_name (string): Name of file with channels to lockout
+        priority_file_name (string): Name of file with channels to for priority
         freq_correction (int): Frequency correction in ppm
+        audio_bps (int): Audio bit depth in bps
     """
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -77,9 +80,22 @@ class CLParser(object):
                           default="",
                           help="File of EOL delimited lockout channels in Hz")
 
+        parser.add_option("-p", "--priority", type="string",
+                          dest="priority_file_name",
+                          default="",
+                          help="File of EOL delimited priority channels in Hz")
+
         parser.add_option("-c", "--correction", type="int", dest="freq_correction",
                           default=0,
                           help="Frequency correction in ppm")
+
+        parser.add_option("-m", "--mute-audio", dest="play",
+                          action="store_false", default=True,
+                          help="Mute audio from speaker (still allows recording)")
+
+        parser.add_option("-b", "--bps", type="int", dest="audio_bps",
+                          default=8,
+                          help="Audio bit depth (bps)")
 
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
@@ -94,8 +110,11 @@ class CLParser(object):
         self.volume_db = float(options.volume_db)
         self.threshold_db = float(options.threshold_db)
         self.record = bool(options.record)
+        self.play = bool(options.play)
         self.lockout_file_name = str(options.lockout_file_name)
+        self.priority_file_name = str(options.priority_file_name)
         self.freq_correction = int(options.freq_correction)
+        self.audio_bps = int(options.audio_bps)
 
 
 def main():
@@ -118,7 +137,9 @@ def main():
     print "threshold_db:        " + str(parser.threshold_db)
     print "record:              " + str(parser.record)
     print "lockout_file_name:   " + str(parser.lockout_file_name)
+    print "priority_file_name:  " + str(parser.priority_file_name)
     print "freq_correction:     " + str(parser.freq_correction)
+    print "audio_bps:           " + str(parser.audio_bps)
 
 
 if __name__ == '__main__':
