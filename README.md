@@ -64,6 +64,10 @@ Example of reading from an IQ file:
 
 `g/f = RF gain +/- 10 dB`
 
+`u/y = IF Gain +/- 10 dB`
+
+`]/[ = BB Gain +/- 10 dB`
+
 `s/a = Squelch +/- 1 dB`
 
 `./, = Volume +/- 1 dB`

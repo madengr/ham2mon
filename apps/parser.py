@@ -57,7 +57,13 @@ class CLParser(object):
                           help="Hardware ask sample rate in sps (1E6 minimum)")
 
         parser.add_option("-g", "--gain", type="eng_float", dest="gain_db",
-                          default=30, help="Hardware RF gain in dB")
+                          default=0, help="Hardware RF gain in dB")
+
+        parser.add_option("-i", "--if_gain", type="eng_float", dest="if_gain_db",
+                          default=16, help="Hardware IF gain in dB")
+
+        parser.add_option("-o", "--bb_gain", type="eng_float", dest="bb_gain_db",
+                          default=16, help="Hardware BB gain in dB")
 
         parser.add_option("-s", "--squelch", type="eng_float",
                           dest="squelch_db", default=-60,
@@ -68,7 +74,7 @@ class CLParser(object):
                           help="Volume in dB")
 
         parser.add_option("-t", "--threshold", type="eng_float",
-                          dest="threshold_db", default=10,
+                          dest="threshold_db", default=0,
                           help="Threshold in dB")
 
         parser.add_option("-w", "--write",
@@ -106,6 +112,8 @@ class CLParser(object):
         self.center_freq = float(options.center_freq)
         self.ask_samp_rate = float(options.ask_samp_rate)
         self.gain_db = float(options.gain_db)
+        self.if_gain_db = float(options.if_gain_db)
+        self.bb_gain_db = float(options.bb_gain_db)
         self.squelch_db = float(options.squelch_db)
         self.volume_db = float(options.volume_db)
         self.threshold_db = float(options.threshold_db)
@@ -132,6 +140,8 @@ def main():
     print "center_freq:         " + str(parser.center_freq)
     print "ask_samp_rate:       " + str(parser.ask_samp_rate)
     print "gain_db:             " + str(parser.gain_db)
+    print "if_gain_db:          " + str(parser.if_gain_db)
+    print "bb_gain_db:          " + str(parser.bb_gain_db)
     print "squelch_db:          " + str(parser.squelch_db)
     print "volume_db:           " + str(parser.volume_db)
     print "threshold_db:        " + str(parser.threshold_db)
