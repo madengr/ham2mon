@@ -28,8 +28,8 @@ class SpectrumWindow(object):
 
         # Set default values
         self.max_db = 50.0
-        self.min_db = -30.0
-        self.threshold_db = 25.0
+        self.min_db = -20.0
+        self.threshold_db = 20.0
 
         # Create a window object in top half of the screen, within the border
         screen_dims = screen.getmaxyx()
@@ -355,11 +355,11 @@ class RxWindow(object):
         self.win.addnstr(1, 1, text, 15)
         text = "RF Gain (dB)  : "
         self.win.addnstr(2, 1, text, 15)
-        text = "IF Gain (dB)  : "        
+        text = "IF Gain (dB)  : "
         self.win.addnstr(3, 1, text, 15)
         text = "BB Gain (dB)  : "
         self.win.addnstr(4, 1, text, 15)   
-        text = "BB Rate (Msps): "     
+        text = "BB Rate (Msps): "
         self.win.addnstr(5, 1, text, 15)
         text = "BB Sql  (dB)  : "
         self.win.addnstr(6, 1, text, 15)
@@ -393,7 +393,7 @@ class RxWindow(object):
         self.win.addnstr(9, 17, text, 8)
         text = str(self.lockout_file_name) + " " + str(self.priority_file_name)
         self.win.addnstr(10, 17, text, 20)
-        
+
         # Hide cursor
         self.win.leaveok(1)
 

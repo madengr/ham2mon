@@ -74,7 +74,7 @@ class CLParser(object):
                           help="Volume in dB")
 
         parser.add_option("-t", "--threshold", type="eng_float",
-                          dest="threshold_db", default=0,
+                          dest="threshold_db", default=10,
                           help="Threshold in dB")
 
         parser.add_option("-w", "--write",

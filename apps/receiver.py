@@ -409,7 +409,7 @@ class Receiver(gr.top_block):
         self.gain_db = 0
         self.if_gain_db = 16
         self.bb_gain_db = 16
-        self.squelch_db = -70
+        self.squelch_db = -60
         self.volume_db = 0
         audio_rate = 8000
 
@@ -605,7 +605,7 @@ def main():
     print "Started %s at %.3f Msps" % (hw_args, receiver.samp_rate/1E6)
     print "RX at %.3f MHz with %d dB gain" % (receiver.center_freq/1E6,
                                               receiver.gain_db)
-    receiver.set_squelch(-70)
+    receiver.set_squelch(-60)
     receiver.set_volume(0)
     print "%d demods of type %d at %d dB squelch and %d dB volume" % \
         (num_demod, type_demod, receiver.squelch_db, receiver.volume_db)
