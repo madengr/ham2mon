@@ -1,18 +1,18 @@
-﻿#HAM2MON
+﻿# HAM2MON
 This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily meant for monitoring amateur radio narrow-band FM modulation and air-band AM modulation.  It should work with any GrOsmoSDR source capable of at least 1 Msps.  Unlike conventional radio scanners that lock and demodulate a single channel, this SDR scanner can demodulate and record audio from N channels in parallel within the digitizing bandwidth.  The N (number of) channels is basically just limited by processor speed.  A video detailing the project may be found here:
 
 http://youtu.be/BXptQFSV8E4
 
 ![GUI screenshot](https://github.com/madengr/ham2mon/blob/master/ham2mon.png)
 
-##Tested with:
+## Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.7.10 (https://github.com/gnuradio/gnuradio)
 - GrOsmoSDR 0.1.4 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
 - Ettus UHD 3.10.0 (https://github.com/EttusResearch/uhd)
 
-##Contributors:
+## Contributors:
 
 atpage:
 - Fixed typos
@@ -32,7 +32,7 @@ madengr:
 - AM demodulation
 - Priority channels
 
-##Console Operation:
+## Console Operation:
 
 The following is an example of the option switches for UHD with NBFM demodulation, although omission of any will use default values (shown below) that are optimal for the B200:
 
@@ -54,19 +54,19 @@ Example of reading from an IQ file:
 
 ./ham2mon.py -a "file=gqrx.raw,rate=8E6,repeat=false,throttle=true,freq=466E6" -r 8E6 -w
 
-##GUI Controls:
+## GUI Controls:
 
-`t/r = Detection threshold +/- 5 dB`
+`t/r = Detection threshold +/- 5 dB. (T/R for +/- 1dB)`
 
 `p/o = Spectrum upper scale +/- 10 dB`
 
 `w/q = Spectrum lower scale +/- 10 dB`
 
-`g/f = RF gain +/- 10 dB`
+`g/f = RF gain +/- 10 dB (G/F for +/- 1dB)`
 
-`u/y = IF Gain +/- 10 dB`
+`u/y = IF Gain +/- 10 dB (U/Y for +/- 1dB)`
 
-`]/[ = BB Gain +/- 10 dB`
+`]/[ = BB Gain +/- 10 dB (}/{ for +/- 1dB)`
 
 `s/a = Squelch +/- 1 dB`
 
@@ -86,7 +86,65 @@ Example of reading from an IQ file:
 
 `CTRL-C = quit`
 
-##Description:
+## Help Menu
+
+`Usage: ham2mon.py [options]`
+
+`Options:`
+
+`  -h, --help            show this help message and exit`
+
+`  -a HW_ARGS, --args=HW_ARGS`
+`                        Hardware args`
+
+`  -n NUM_DEMOD, --demod=NUM_DEMOD`
+`                        Number of demodulators`
+
+`  -d TYPE_DEMOD, --demodulator=TYPE_DEMOD`
+`                        Type of demodulator (0=NBFM, 1=AM)`
+
+`  -f CENTER_FREQ, --freq=CENTER_FREQ`
+`                        Hardware RF center frequency in Hz`
+
+`  -r ASK_SAMP_RATE, --rate=ASK_SAMP_RATE`
+`                        Hardware ask sample rate in sps (1E6 minimum)`
+
+`  -g GAIN_DB, --gain=GAIN_DB`
+`                        Hardware RF gain in dB`
+
+`  -i IF_GAIN_DB, --if_gain=IF_GAIN_DB`
+`                        Hardware IF gain in dB`
+
+`  -o BB_GAIN_DB, --bb_gain=BB_GAIN_DB`
+`                        Hardware BB gain in dB`
+
+`  -s SQUELCH_DB, --squelch=SQUELCH_DB`
+`                        Squelch in dB`
+
+`  -v VOLUME_DB, --volume=VOLUME_DB`
+`                        Volume in dB`
+
+`  -t THRESHOLD_DB, --threshold=THRESHOLD_DB`
+`                        Threshold in dB`
+
+`  -w, --write           Record (write) channels to disk`
+
+`  -l LOCKOUT_FILE_NAME, --lockout=LOCKOUT_FILE_NAME`
+`                        File of EOL delimited lockout channels in Hz`
+
+`  -p PRIORITY_FILE_NAME, --priority=PRIORITY_FILE_NAME`
+`                        File of EOL delimited priority channels in Hz`
+
+`  -c FREQ_CORRECTION, --correction=FREQ_CORRECTION`
+`                        Frequency correction in ppm`
+
+`  -m, --mute-audio      Mute audio from speaker (still allows recording)`
+
+`  -b AUDIO_BPS, --bps=AUDIO_BPS`
+`                        Audio bit depth (bps)`
+
+
+## Description:
 The high speed signal processing is done in GR and the logic & control in Python. There are no custom GR blocks.  The GUI is written in Curses and is meant to be lightweight.  See the video for a basic overview.  I attempted to make the program very object oriented and “Pythonic”.  Each module runs on it's own for testing purposes.
 
 ![GRC screenshot](https://github.com/madengr/ham2mon/blob/master/flow_example.png)
