@@ -1,18 +1,18 @@
-﻿#HAM2MON
+﻿# HAM2MON
 This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily meant for monitoring amateur radio narrow-band FM modulation and air-band AM modulation.  It should work with any GrOsmoSDR source capable of at least 1 Msps.  Unlike conventional radio scanners that lock and demodulate a single channel, this SDR scanner can demodulate and record audio from N channels in parallel within the digitizing bandwidth.  The N (number of) channels is basically just limited by processor speed.  A video detailing the project may be found here:
 
 http://youtu.be/BXptQFSV8E4
 
 ![GUI screenshot](https://github.com/madengr/ham2mon/blob/master/ham2mon.png)
 
-##Tested with:
+## Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.7.10 (https://github.com/gnuradio/gnuradio)
 - GrOsmoSDR 0.1.4 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
 - Ettus UHD 3.10.0 (https://github.com/EttusResearch/uhd)
 
-##Contributors:
+## Contributors:
 
 atpage:
 - Fixed typos
@@ -32,7 +32,7 @@ madengr:
 - AM demodulation
 - Priority channels
 
-##Console Operation:
+## Console Operation:
 
 The following is an example of the option switches for UHD with NBFM demodulation, although omission of any will use default values (shown below) that are optimal for the B200:
 
@@ -54,7 +54,7 @@ Example of reading from an IQ file:
 
 ./ham2mon.py -a "file=gqrx.raw,rate=8E6,repeat=false,throttle=true,freq=466E6" -r 8E6 -w
 
-##GUI Controls:
+## GUI Controls:
 
 `t/r = Detection threshold +/- 5 dB. (T/R for +/- 1dB)`
 
@@ -86,7 +86,7 @@ Example of reading from an IQ file:
 
 `CTRL-C = quit`
 
-##Help Menu
+## Help Menu
 
 `Usage: ham2mon.py [options]`
 
@@ -144,7 +144,7 @@ Example of reading from an IQ file:
 `                        Audio bit depth (bps)`
 
 
-##Description:
+## Description:
 The high speed signal processing is done in GR and the logic & control in Python. There are no custom GR blocks.  The GUI is written in Curses and is meant to be lightweight.  See the video for a basic overview.  I attempted to make the program very object oriented and “Pythonic”.  Each module runs on it's own for testing purposes.
 
 ![GRC screenshot](https://github.com/madengr/ham2mon/blob/master/flow_example.png)
