@@ -147,3 +147,5 @@ if __name__ == '__main__':
             curses.wrapper(main)
     except KeyboardInterrupt:
         pass
+    except RuntimeError:
+        print "RuntimeError: SDR hardware not detected"
