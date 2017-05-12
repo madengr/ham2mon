@@ -56,17 +56,17 @@ Example of reading from an IQ file:
 
 ##GUI Controls:
 
-`t/r = Detection threshold +/- 5 dB`
+`t/r = Detection threshold +/- 5 dB. (T/R for +/- 1dB)`
 
 `p/o = Spectrum upper scale +/- 10 dB`
 
 `w/q = Spectrum lower scale +/- 10 dB`
 
-`g/f = RF gain +/- 10 dB`
+`g/f = RF gain +/- 10 dB (G/F for +/- 1dB)`
 
-`u/y = IF Gain +/- 10 dB`
+`u/y = IF Gain +/- 10 dB (U/Y for +/- 1dB)`
 
-`]/[ = BB Gain +/- 10 dB`
+`]/[ = BB Gain +/- 10 dB (}/{ for +/- 1dB)`
 
 `s/a = Squelch +/- 1 dB`
 
@@ -85,6 +85,46 @@ Example of reading from an IQ file:
 `l = Clear lockouts`
 
 `CTRL-C = quit`
+
+##Help Menu
+
+Usage: ham2mon.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -a HW_ARGS, --args=HW_ARGS
+                        Hardware args
+  -n NUM_DEMOD, --demod=NUM_DEMOD
+                        Number of demodulators
+  -d TYPE_DEMOD, --demodulator=TYPE_DEMOD
+                        Type of demodulator (0=NBFM, 1=AM)
+  -f CENTER_FREQ, --freq=CENTER_FREQ
+                        Hardware RF center frequency in Hz
+  -r ASK_SAMP_RATE, --rate=ASK_SAMP_RATE
+                        Hardware ask sample rate in sps (1E6 minimum)
+  -g GAIN_DB, --gain=GAIN_DB
+                        Hardware RF gain in dB
+  -i IF_GAIN_DB, --if_gain=IF_GAIN_DB
+                        Hardware IF gain in dB
+  -o BB_GAIN_DB, --bb_gain=BB_GAIN_DB
+                        Hardware BB gain in dB
+  -s SQUELCH_DB, --squelch=SQUELCH_DB
+                        Squelch in dB
+  -v VOLUME_DB, --volume=VOLUME_DB
+                        Volume in dB
+  -t THRESHOLD_DB, --threshold=THRESHOLD_DB
+                        Threshold in dB
+  -w, --write           Record (write) channels to disk
+  -l LOCKOUT_FILE_NAME, --lockout=LOCKOUT_FILE_NAME
+                        File of EOL delimited lockout channels in Hz
+  -p PRIORITY_FILE_NAME, --priority=PRIORITY_FILE_NAME
+                        File of EOL delimited priority channels in Hz
+  -c FREQ_CORRECTION, --correction=FREQ_CORRECTION
+                        Frequency correction in ppm
+  -m, --mute-audio      Mute audio from speaker (still allows recording)
+  -b AUDIO_BPS, --bps=AUDIO_BPS
+                        Audio bit depth (bps)
+
 
 ##Description:
 The high speed signal processing is done in GR and the logic & control in Python. There are no custom GR blocks.  The GUI is written in Curses and is meant to be lightweight.  See the video for a basic overview.  I attempted to make the program very object oriented and “Pythonic”.  Each module runs on it's own for testing purposes.

@@ -142,6 +142,12 @@ class SpectrumWindow(object):
         elif keyb == ord('r'):
             self.threshold_db -= 5
             return True
+        elif keyb == ord('T'):
+            self.threshold_db += 1
+            return True
+        elif keyb == ord('R'):
+            self.threshold_db -= 1
+            return True
         elif keyb == ord('p'):
             self.max_db += 10
         elif keyb == ord('o'):
@@ -471,20 +477,47 @@ class RxWindow(object):
         elif keyb == ord('f'):
             self.gain_db -= 10
             return True
-        # Tune self.if_gain_db in 2 dB steps with 'u' and 'y'
+
+        # Tune self.gain_db in 1 dB steps with 'G' and 'F'
+        if keyb == ord('G'):
+            self.gain_db += 1
+            return True
+        elif keyb == ord('F'):
+            self.gain_db -= 1
+            return True
+
+        # Tune self.if_gain_db in 10 dB steps with 'u' and 'y'
         if keyb == ord('u'):
             self.if_gain_db += 10
             return True
         elif keyb == ord('y'):
             self.if_gain_db -= 10
             return True
-        # Tune self.bb_gain_db in 5 dB steps with ']' and '['
+
+        # Tune self.if_gain_db in 1 dB steps with 'U' and 'Y'
+        if keyb == ord('U'):
+            self.if_gain_db += 1
+            return True
+        elif keyb == ord('Y'):
+            self.if_gain_db -= 1
+            return True
+
+        # Tune self.bb_gain_db in 10 dB steps with ']' and '['
         if keyb == ord(']'):
             self.bb_gain_db += 10
             return True
         elif keyb == ord('['):
             self.bb_gain_db -= 10
             return True
+
+        # Tune self.bb_gain_db in 1 dB steps with '}' and '{'
+        if keyb == ord('}'):
+            self.bb_gain_db += 1
+            return True
+        elif keyb == ord('{'):
+            self.bb_gain_db -= 1
+            return True
+
         # Tune self.squelch_db in 1 dB steps with 's' and 'a'
         elif keyb == ord('s'):
             self.squelch_db += 1
