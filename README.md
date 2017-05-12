@@ -14,6 +14,10 @@ http://youtu.be/BXptQFSV8E4
 
 ## Contributors:
 
+m0mik:
+- Added HackRF IF/BB gain parameters
+- Added 1dB shift option to threshold and gain settings
+
 atpage:
 - Fixed typos
 
