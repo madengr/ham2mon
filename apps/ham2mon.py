@@ -148,4 +148,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     except RuntimeError:
-        print "RuntimeError: SDR hardware not detected"
+        print ""
+        print "RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root."
+        print ""
+
