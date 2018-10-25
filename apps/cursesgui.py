@@ -326,6 +326,7 @@ class RxWindow(object):
         # Set default values
         self.center_freq = 146E6
         self.samp_rate = 2E6
+        self.freq_entry = 'None'
         self.gain_db = 0
         self.if_gain_db = 16
         self.bb_gain_db = 16
@@ -379,7 +380,10 @@ class RxWindow(object):
         self.win.addnstr(10, 1, text, 15)
 
         # Draw the receiver info suffix fields
-        text = '{:.3f}'.format((self.center_freq)/1E6)
+        if self.freq_entry <> 'None':
+            text = self.freq_entry
+        else:
+            text = '{:.3f}'.format((self.center_freq)/1E6)
         self.win.addnstr(1, 17, text, 8, curses.color_pair(5))
         text = str(self.gain_db)
         self.win.addnstr(2, 17, text, 8, curses.color_pair(5))
@@ -450,6 +454,29 @@ class RxWindow(object):
             return True
         elif keyb == ord('j'):
             self.center_freq -= 1E5
+            return True
+        elif keyb == ord('/'):
+            # set mode to frequency entry
+            self.freq_entry = ''
+            return True
+        elif keyb == 27:
+            # end frequncy entry mode without seting the frequency
+            self.freq_entry = 'None'
+            return True
+        elif keyb == ord('\n'):
+            # set the frequency from what was entered
+            try:
+                self.center_freq = float(self.freq_entry) * 1E6
+            except:
+                pass
+            self.freq_entry = 'None'
+            return True
+        elif self.freq_entry <> 'None' and (keyb - 48 in range (10) or keyb == ord('.')):
+            # build up frequency from 1-9 and '.'
+            self.freq_entry = self.freq_entry + chr(keyb)
+            return True
+        elif keyb == 127:
+            self.freq_entry = self.freq_entry[:-1]
             return True
         else:
             return False
