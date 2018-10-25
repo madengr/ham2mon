@@ -88,6 +88,8 @@ Example of reading from an IQ file:
 
 `l = Clear lockouts`
 
+`/ = Frequency entry mode (Esc to exit)`
+
 `CTRL-C = quit`
 
 ## Help Menu

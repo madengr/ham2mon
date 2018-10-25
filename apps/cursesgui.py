@@ -459,7 +459,7 @@ class RxWindow(object):
             # set mode to frequency entry
             self.freq_entry = ''
             return True
-        elif keyb == 27:
+        elif keyb == 27:  # ESC
             # end frequncy entry mode without seting the frequency
             self.freq_entry = 'None'
             return True
@@ -475,7 +475,7 @@ class RxWindow(object):
             # build up frequency from 1-9 and '.'
             self.freq_entry = self.freq_entry + chr(keyb)
             return True
-        elif keyb == 127:
+        elif keyb == 127:  # BKSP
             self.freq_entry = self.freq_entry[:-1]
             return True
         else:
