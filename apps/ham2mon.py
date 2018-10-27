@@ -129,7 +129,7 @@ def main(screen):
             rxwin.volume_db = scanner.volume_db
 
         # Send keystroke to lockout window and update lockout channels if True
-        if lockoutwin.proc_keyb_set_lockout(keyb):
+        if lockoutwin.proc_keyb_set_lockout(keyb) and rxwin.freq_entry == 'None':
             # Subtract 48 from ascii keyb value to obtain 0 - 9
             idx = keyb - 48
             scanner.add_lockout(idx)
