@@ -89,7 +89,7 @@ class SpectrumWindow(object):
          # Clear previous contents, draw border, and title
         self.win.clear()
         self.win.border(0)
-        self.win.addnstr(0, self.dims[1]/2-4, "SPECTRUM", 8,
+        self.win.addnstr(0, int(self.dims[1]/2-4), "SPECTRUM", 8,
                          curses.color_pair(4))
 
         # Draw the bars
@@ -191,7 +191,7 @@ class ChannelWindow(object):
         # Clear previous contents, draw border, and title
         self.win.clear()
         self.win.border(0)
-        self.win.addnstr(0, self.dims[1]/2-4, "CHANNELS", 8,
+        self.win.addnstr(0, int(self.dims[1]/2-4), "CHANNELS", 8,
                          curses.color_pair(4))
 
         # Limit the displayed channels to no more than two rows
@@ -247,7 +247,7 @@ class LockoutWindow(object):
         # Clear previous contents, draw border, and title
         self.win.clear()
         self.win.border(0)
-        self.win.addnstr(0, self.dims[1]/2-3, "LOCKOUT", 7,
+        self.win.addnstr(0, int(self.dims[1]/2-3), "LOCKOUT", 7,
                          curses.color_pair(4))
 
         # Draw the lockout channels
@@ -354,7 +354,7 @@ class RxWindow(object):
         # Clear previous contents, draw border, and title
         self.win.clear()
         self.win.border(0)
-        self.win.addnstr(0, self.dims[1]/2-4, "RECEIVER", 8,
+        self.win.addnstr(0, int(self.dims[1]/2-4), "RECEIVER", 8,
                          curses.color_pair(4))
 
         # Draw the receiver info prefix fields
@@ -380,7 +380,7 @@ class RxWindow(object):
         self.win.addnstr(10, 1, text, 15)
 
         # Draw the receiver info suffix fields
-        if self.freq_entry <> 'None':
+        if self.freq_entry != 'None':
             text = self.freq_entry
         else:
             text = '{:.3f}'.format((self.center_freq)/1E6)
@@ -471,7 +471,7 @@ class RxWindow(object):
                 pass
             self.freq_entry = 'None'
             return True
-        elif self.freq_entry <> 'None' and (keyb - 48 in range (10) or keyb == ord('.')):
+        elif self.freq_entry != 'None' and (keyb - 48 in range (10) or keyb == ord('.')):
             # build up frequency from 1-9 and '.'
             self.freq_entry = self.freq_entry + chr(keyb)
             return False

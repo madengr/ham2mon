@@ -601,14 +601,14 @@ def main():
     center_freq = 144.5E6
     receiver.set_center_freq(center_freq)
     receiver.set_gain(10)
-    print "\n"
-    print "Started %s at %.3f Msps" % (hw_args, receiver.samp_rate/1E6)
-    print "RX at %.3f MHz with %d dB gain" % (receiver.center_freq/1E6,
-                                              receiver.gain_db)
+    print("\n")
+    print("Started %s at %.3f Msps" % (hw_args, receiver.samp_rate/1E6))
+    print("RX at %.3f MHz with %d dB gain" % (receiver.center_freq/1E6,
+                                              receiver.gain_db))
     receiver.set_squelch(-60)
     receiver.set_volume(0)
-    print "%d demods of type %d at %d dB squelch and %d dB volume" % \
-        (num_demod, type_demod, receiver.squelch_db, receiver.volume_db)
+    print("%d demods of type %d at %d dB squelch and %d dB volume" % \
+        (num_demod, type_demod, receiver.squelch_db, receiver.volume_db))
 
     # Create some baseband channels to tune based on 144 MHz center
     channels = np.zeros(num_demod)
@@ -622,9 +622,9 @@ def main():
 
     # Print demodulator info
     for idx, channel in enumerate(channels):
-        print "Tuned demod %d to %.3f MHz" % (idx,
+        print("Tuned demod %d to %.3f MHz" % (idx,
                                               (channel+receiver.center_freq)
-                                              /1E6)
+                                              /1E6))
 
     while 1:
         # No need to go faster than 10 Hz rate of GNU Radio probe
@@ -633,7 +633,7 @@ def main():
 
         # Grab the FFT data and print max value
         spectrum = receiver.probe_signal_vf.level()
-        print "Max spectrum of %.3f" % (np.max(spectrum))
+        print("Max spectrum of %.3f" % (np.max(spectrum)))
 
     # Stop the receiver
     receiver.stop()
