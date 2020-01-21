@@ -5,7 +5,10 @@ Created on Fri Jul  3 13:38:36 2015
 
 @author: madengr
 """
-import builtins
+try:
+    import builtins
+except:
+    import __builtin__
 import receiver as recvr
 import estimate
 import parser as prsr
