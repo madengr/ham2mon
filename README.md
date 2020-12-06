@@ -36,6 +36,11 @@ madengr:
 - AM demodulation
 - Priority channels
 
+lordmorgul:
+- min and max spectrum switches
+- python3 builtin functions correction for priority and lockout parsing
+- example priority and lockout files
+
 ## Console Operation:
 
 The following is an example of the option switches for UHD with NBFM demodulation, although omission of any will use default values (shown below) that are optimal for the B200:
@@ -62,9 +67,9 @@ Example of reading from an IQ file:
 
 `t/r = Detection threshold +/- 5 dB. (T/R for +/- 1dB)`
 
-`p/o = Spectrum upper scale +/- 10 dB`
+`p/o = Spectrum upper scale +/- 5 dB`
 
-`w/q = Spectrum lower scale +/- 10 dB`
+`w/q = Spectrum lower scale +/- 5 dB`
 
 `g/f = RF gain +/- 10 dB (G/F for +/- 1dB)`
 
@@ -148,6 +153,12 @@ Example of reading from an IQ file:
 
 `  -b AUDIO_BPS, --bps=AUDIO_BPS`
 `                        Audio bit depth (bps)`
+
+`  -M MAX_DB, --max_db=MAX_DB`
+`                        Spectrum window maximum in dB`
+
+`  -N MIN_DB, --min_db=MIN_DB`
+`                        Spectrum window minimum in dB`
 
 
 ## Description:
