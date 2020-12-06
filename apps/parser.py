@@ -132,24 +132,24 @@ def main():
 
     if len(parser.parser_args) != 0:
         parser.print_help() #pylint: disable=maybe-no-member
-        raise SystemExit, 1
+        raise(SystemExit, 1)
 
-    print "hw_args:             " + parser.hw_args
-    print "num_demod:           " + str(parser.num_demod)
-    print "type_demod:          " + str(parser.type_demod)
-    print "center_freq:         " + str(parser.center_freq)
-    print "ask_samp_rate:       " + str(parser.ask_samp_rate)
-    print "gain_db:             " + str(parser.gain_db)
-    print "if_gain_db:          " + str(parser.if_gain_db)
-    print "bb_gain_db:          " + str(parser.bb_gain_db)
-    print "squelch_db:          " + str(parser.squelch_db)
-    print "volume_db:           " + str(parser.volume_db)
-    print "threshold_db:        " + str(parser.threshold_db)
-    print "record:              " + str(parser.record)
-    print "lockout_file_name:   " + str(parser.lockout_file_name)
-    print "priority_file_name:  " + str(parser.priority_file_name)
-    print "freq_correction:     " + str(parser.freq_correction)
-    print "audio_bps:           " + str(parser.audio_bps)
+    print("hw_args:             " + parser.hw_args)
+    print("num_demod:           " + str(parser.num_demod))
+    print("type_demod:          " + str(parser.type_demod))
+    print("center_freq:         " + str(parser.center_freq))
+    print("ask_samp_rate:       " + str(parser.ask_samp_rate))
+    print("gain_db:             " + str(parser.gain_db))
+    print("if_gain_db:          " + str(parser.if_gain_db))
+    print("bb_gain_db:          " + str(parser.bb_gain_db))
+    print("squelch_db:          " + str(parser.squelch_db))
+    print("volume_db:           " + str(parser.volume_db))
+    print("threshold_db:        " + str(parser.threshold_db))
+    print("record:              " + str(parser.record))
+    print("lockout_file_name:   " + str(parser.lockout_file_name))
+    print("priority_file_name:  " + str(parser.priority_file_name))
+    print("freq_correction:     " + str(parser.freq_correction))
+    print("audio_bps:           " + str(parser.audio_bps))
 
 
 if __name__ == '__main__':
