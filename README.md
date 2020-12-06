@@ -36,6 +36,9 @@ madengr:
 - AM demodulation
 - Priority channels
 
+ta6o:
+- initial python3 fixes for syntax
+
 lordmorgul:
 - min and max spectrum switches
 - python3 builtin functions correction for priority and lockout parsing
