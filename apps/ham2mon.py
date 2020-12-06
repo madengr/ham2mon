@@ -80,6 +80,8 @@ def main(screen):
     rxwin.lockout_file_name = scanner.lockout_file_name
     rxwin.priority_file_name = scanner.priority_file_name
 
+    specwin.max_db = PARSER.max_db
+    specwin.min_db = PARSER.min_db
     specwin.threshold_db = scanner.threshold_db
 
     while 1:

@@ -27,6 +27,8 @@ class CLParser(object):
         priority_file_name (string): Name of file with channels to for priority
         freq_correction (int): Frequency correction in ppm
         audio_bps (int): Audio bit depth in bps
+        max_db (float): Spectrum max dB for display
+        min_db (float): Spectrum min dB for display
     """
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -102,6 +104,15 @@ class CLParser(object):
         parser.add_option("-b", "--bps", type="int", dest="audio_bps",
                           default=8,
                           help="Audio bit depth (bps)")
+        
+        parser.add_option("-M", "--max_db", type="float", dest="max_db",
+                          default=50,
+                          help="Spectrum window max dB for display")
+        
+        parser.add_option("-N", "--min_db", type="float", dest="min_db",
+                          default=-10,
+                          help="Spectrum window min dB for display (no greater than -10dB from max")
+
 
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
@@ -123,6 +134,8 @@ class CLParser(object):
         self.priority_file_name = str(options.priority_file_name)
         self.freq_correction = int(options.freq_correction)
         self.audio_bps = int(options.audio_bps)
+        self.max_db = float(options.max_db)
+        self.min_db = float(options.min_db)
 
 
 def main():
@@ -150,6 +163,8 @@ def main():
     print("priority_file_name:  " + str(parser.priority_file_name))
     print("freq_correction:     " + str(parser.freq_correction))
     print("audio_bps:           " + str(parser.audio_bps))
+    print("max_db:              " + str(parser.max_db))
+    print("min_db:              " + str(parser.min_db))
 
 
 if __name__ == '__main__':

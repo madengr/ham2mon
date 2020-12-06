@@ -149,13 +149,13 @@ class SpectrumWindow(object):
             self.threshold_db -= 1
             return True
         elif keyb == ord('p'):
-            self.max_db += 10
+            self.max_db += 5
         elif keyb == ord('o'):
-            self.max_db -= 10
+            self.max_db -= 5
         elif keyb == ord('w'):
-            self.min_db += 10
+            self.min_db += 5
         elif keyb == ord('q'):
-            self.min_db -= 10
+            self.min_db -= 5
         else:
             pass
         return False

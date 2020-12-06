@@ -5,16 +5,40 @@ Created on Fri Jul  3 13:38:36 2015
 
 @author: madengr
 """
-try:
-    import builtins
-except:
-    import __builtin__
+
 import receiver as recvr
 import estimate
 import parser as prsr
 import time
 import numpy as np
 import sys
+import types
+
+PY3 = sys.version_info[0] == 3
+PY2 = sys.version_info[0] == 2
+
+if PY3:
+    import builtins
+    # list-producing versions of the major Python iterating functions
+    def lrange(*args, **kwargs):
+        return list(range(*args, **kwargs))
+
+    def lzip(*args, **kwargs):
+        return list(zip(*args, **kwargs))
+
+    def lmap(*args, **kwargs):
+        return list(map(*args, **kwargs))
+
+    def lfilter(*args, **kwargs):
+        return list(filter(*args, **kwargs))
+else:
+    import __builtin__
+    # Python 2-builtin ranges produce lists
+    lrange = __builtin__.range
+    lzip = __builtin__.zip
+    lmap = __builtin__.map
+    lfilter = __builtin__.filter
+
 
 class Scanner(object):
     """Scanner that controls receiver
@@ -217,7 +241,10 @@ class Scanner(object):
             with open(self.lockout_file_name) as lockout_file:
                 lines = lockout_file.read().splitlines()
                 lockout_file.close()
-                lines = __builtin__.filter(None, lines)
+                if PY3:
+                    lines = builtins.filter(None, lines)
+                else:
+                    lines = __builtin__.filter(None, lines)
             # Convert to baseband frequencies, round, and append
             for freq in lines:
                 bb_freq = float(freq) - self.center_freq
@@ -247,7 +274,10 @@ class Scanner(object):
             with open(self.priority_file_name) as priority_file:
                 lines = priority_file.read().splitlines()
                 priority_file.close()
-                lines = __builtin__.filter(None, lines)
+                if PY3:
+                    lines = builtins.filter(None, lines)
+                else:
+                    lines = __builtin__.filter(None, lines)
             # Convert to baseband frequencies, round, and append if within BW
             for freq in lines:
                 bb_freq = float(freq) - self.center_freq
