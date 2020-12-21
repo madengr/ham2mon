@@ -576,7 +576,7 @@ class Receiver(gr.top_block):
 def main():
     """Test the receiver
 
-    Sets up the hadrware
+    Sets up the hardware
     Tunes a couple of demodulators
     Prints the max power spectrum
     """

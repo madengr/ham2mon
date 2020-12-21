@@ -69,6 +69,7 @@ class Scanner(object):
         lockout_channels [float]: List of baseband lockout channels in Hz
         priority_channels [float]: List of baseband priority channels in Hz
         gui_tuned_channels [str] List of tuned RF channels in MHz for GUI
+        gui_active_channels [str] List of active RF channels in MHz for GUI (currently above threshold)
         gui_tuned_lockout_channels [str]: List of lockout channels in MHz GUI
         channel_spacing (float):  Spacing that channels will be rounded
         lockout_file_name (string): Name of file with channels to lockout
@@ -94,7 +95,9 @@ class Scanner(object):
         self.spectrum = []
         self.lockout_channels = []
         self.priority_channels = []
+        self.active_channels = []
         self.gui_tuned_channels = []
+        self.gui_active_channels = []
         self.gui_lockout_channels = []
         self.channel_spacing = 5000
         self.lockout_file_name = lockout_file_name
@@ -141,6 +144,7 @@ class Scanner(object):
         channels = np.array(estimate.channel_estimate(self.spectrum,
                                                       threshold))
 
+
         # Convert channels from bin indices to baseband frequency in Hz
         channels = (channels-len(self.spectrum)/2)*\
             self.samp_rate/len(self.spectrum)
@@ -149,6 +153,9 @@ class Scanner(object):
         # Note this affects tuning the demodulators
         # 5000 Hz is adequate for NBFM
         channels = np.round(channels / self.channel_spacing) * self.channel_spacing
+
+        # set active channels for gui highlight before filtering down lockout or adding priority
+        active_channels = channels
 
         # Remove channels that are already in the priority list
         temp = []
@@ -206,6 +213,17 @@ class Scanner(object):
                                     self.center_freq)/1E6
                 text = '{:.3f}'.format(gui_tuned_channel)
             self.gui_tuned_channels.append(text)
+
+        # Create an active channel list of strings for the GUI
+        # This is any channel above threshold
+        # do not include priority if not above threshold
+        # do include lockout if above threshold
+        self.gui_active_channels = []
+        for channel in active_channels:
+            gui_active_channel = (channel + self.center_freq)/1E6
+            text = '{:.3f}'.format(gui_active_channel)
+            self.gui_active_channels.append(text)
+
 
     def add_lockout(self, idx):
         """Adds baseband frequency to lockout channels and updates GUI list

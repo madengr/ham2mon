@@ -93,8 +93,8 @@ def main(screen):
 
         # Update the spectrum, channel, and rx displays
         specwin.draw_spectrum(scanner.spectrum)
-        chanwin.draw_channels(scanner.gui_tuned_channels)
-        lockoutwin.draw_channels(scanner.gui_lockout_channels)
+        chanwin.draw_channels(scanner.gui_tuned_channels, scanner.gui_active_channels)
+        lockoutwin.draw_channels(scanner.gui_lockout_channels, scanner.gui_active_channels)
         rxwin.draw_rx()
 
         # Update physical screen

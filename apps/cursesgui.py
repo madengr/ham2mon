@@ -54,6 +54,7 @@ class SpectrumWindow(object):
             1.0E+00 draws 10 rows
             1.0E+01 draws 10 rows
         """
+
         # Keep min_db to 10 dB below max_db
         if self.min_db > (self.max_db - 10):
             self.min_db = self.max_db - 10
@@ -92,11 +93,25 @@ class SpectrumWindow(object):
         self.win.addnstr(0, int(self.dims[1]/2-4), "SPECTRUM", 8,
                          curses.color_pair(4))
 
+        # Generate threshold line, clip to window, and convert to int
+        pos_yt = (self.threshold_db - self.max_db) * scale
+        pos_yt = np.clip(pos_yt, min_y, max_y-1)
+        pos_yt = pos_yt.astype(int)
+
         # Draw the bars
         for pos_x in range(len(pos_y)):
             # Invert the y fill since we want bars
             # Offset x (column) by 1 so it does not start on the border
-            self.win.vline(pos_y[pos_x], pos_x+1, "*", max_y-pos_y[pos_x])
+            if pos_y[pos_x] > pos_yt:
+                # bar is below threshold, use low value color
+                self.win.vline(pos_y[pos_x], pos_x+1, "-", max_y-pos_y[pos_x],curses.color_pair(3))
+            elif pos_y[pos_x] <= min_y:
+                # bar is above max (clipped to min y), use max value color
+                self.win.vline(pos_y[pos_x], pos_x+1, "+", max_y-pos_y[pos_x],curses.color_pair(1))
+            else:
+                # bar is between max value and threshold, use threshold color
+                self.win.vline(pos_y[pos_x], pos_x+1, "*", max_y-pos_y[pos_x],curses.color_pair(2))
+
 
         # Draw the max_db and min_db strings
         string = ">" + "%+03d" % self.max_db
@@ -105,11 +120,6 @@ class SpectrumWindow(object):
         string = ">" + "%+03d" % self.min_db
         self.win.addnstr(max_y, 1 + self.dims[1] - self.chars, string,
                          self.chars, curses.color_pair(3))
-
-        # Generate threshold line, clip to window, and convert to int
-        pos_yt = (self.threshold_db - self.max_db) * scale
-        pos_yt = np.clip(pos_yt, min_y, max_y-1)
-        pos_yt = pos_yt.astype(int)
 
         # Draw the theshold line
         # x=1 start to account for left border
@@ -120,11 +130,12 @@ class SpectrumWindow(object):
         self.win.addnstr(pos_yt, (1 + self.dims[1] - self.chars), string,
                          self.chars, curses.color_pair(2))
 
-       # Hide cursor
+        # Hide cursor
         self.win.leaveok(1)
 
         # Update virtual window
         self.win.noutrefresh()
+
 
     def proc_keyb(self, keyb):
         """Process keystrokes
@@ -181,7 +192,7 @@ class ChannelWindow(object):
         self.win = curses.newwin(height, width, height + 3, 1)
         self.dims = self.win.getmaxyx()
 
-    def draw_channels(self, gui_tuned_channels):
+    def draw_channels(self, gui_tuned_channels, gui_active_channels):
         """Draws tuned channels list
 
         Args:
@@ -201,15 +212,27 @@ class ChannelWindow(object):
         else:
             pass
 
+        active_channels = set(gui_active_channels)
+
         # Draw the tuned channels prefixed by index in list (demodulator index)
+        # Use color if tuned channel is in active channel list during this scan_cycle
         for idx, gui_tuned_channel in enumerate(gui_tuned_channels):
             text = str(idx) + ": " + gui_tuned_channel
             if idx < self.dims[0]-2:
                 # Display in first column
-                self.win.addnstr(idx+1, 1, text, 11)
+                # text color based on activity
+                # curses.color_pair(5)
+                if gui_tuned_channel in active_channels:
+                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(2))
+                else:
+                    self.win.addnstr(idx+1, 1, text, 11)
             else:
                 # Display in second column
                 self.win.addnstr(idx-self.dims[0]+3, 13, text, 11)
+                if gui_tuned_channel in active_channels:
+                    self.win.addnstr(idx-self.dims[0]+3, 13, text, 11, curses.color_pair(2))
+                else:
+                    self.win.addnstr(idx-self.dims[0]+3, 13, text, 11)
 
         # Hide cursor
         self.win.leaveok(1)
@@ -238,8 +261,8 @@ class LockoutWindow(object):
         self.win = curses.newwin(height, width, height + 3, 26)
         self.dims = self.win.getmaxyx()
 
-    def draw_channels(self, gui_lockout_channels):
-        """Draws tuned channels list
+    def draw_channels(self, gui_lockout_channels, gui_active_channels):
+        """Draws lockout channels list
 
         Args:
             rf_channels [string]: List of strings in MHz
@@ -250,12 +273,18 @@ class LockoutWindow(object):
         self.win.addnstr(0, int(self.dims[1]/2-3), "LOCKOUT", 7,
                          curses.color_pair(4))
 
+        active_channels = set(gui_active_channels)
+
         # Draw the lockout channels
+        # Use color if lockout channel is in active channel list during this scan_cycle
         for idx, gui_lockout_channel in enumerate(gui_lockout_channels):
             # Don't draw past height of window
             if idx <= self.dims[0]-3:
                 text = "   " + gui_lockout_channel
-                self.win.addnstr(idx+1, 1, text, 11)
+                if gui_lockout_channel in active_channels:
+                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(5))
+                else:
+                    self.win.addnstr(idx+1, 1, text, 11)
             else:
                 pass
 
