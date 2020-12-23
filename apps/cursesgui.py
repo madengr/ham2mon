@@ -88,7 +88,8 @@ class SpectrumWindow(object):
         pos_y = pos_y.astype(int)
 
          # Clear previous contents, draw border, and title
-        self.win.clear()
+#        self.win.clear()
+        self.win.erase()
         self.win.border(0)
         self.win.addnstr(0, int(self.dims[1]/2-4), "SPECTRUM", 8,
                          curses.color_pair(4))
@@ -200,7 +201,8 @@ class ChannelWindow(object):
         """
 
         # Clear previous contents, draw border, and title
-        self.win.clear()
+#        self.win.clear()
+        self.win.erase()
         self.win.border(0)
         self.win.addnstr(0, int(self.dims[1]/2-4), "CHANNELS", 8,
                          curses.color_pair(4))
@@ -268,7 +270,8 @@ class LockoutWindow(object):
             rf_channels [string]: List of strings in MHz
         """
         # Clear previous contents, draw border, and title
-        self.win.clear()
+#        self.win.clear()
+        self.win.erase()
         self.win.border(0)
         self.win.addnstr(0, int(self.dims[1]/2-3), "LOCKOUT", 7,
                          curses.color_pair(4))
@@ -381,7 +384,8 @@ class RxWindow(object):
         """
 
         # Clear previous contents, draw border, and title
-        self.win.clear()
+#        self.win.clear()
+        self.win.erase()
         self.win.border(0)
         self.win.addnstr(0, int(self.dims[1]/2-4), "RECEIVER", 8,
                          curses.color_pair(4))
@@ -596,6 +600,9 @@ def setup_screen(screen):
     """
     # Set screen to getch() is non-blocking
     screen.nodelay(1)
+
+    # hide cursor
+    curses.curs_set(0)
 
     # Define some colors
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
