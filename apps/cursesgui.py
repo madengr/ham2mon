@@ -91,8 +91,9 @@ class SpectrumWindow(object):
 #        self.win.clear()
         self.win.erase()
         self.win.border(0)
-        self.win.addnstr(0, int(self.dims[1]/2-4), "SPECTRUM", 8,
-                         curses.color_pair(4))
+        self.win.attron(curses.color_pair(6))
+        self.win.addnstr(0, int(self.dims[1]/2-6), "SPECTRUM", 8,
+                         curses.color_pair(6) | curses.A_DIM | curses.A_BOLD)
 
         # Generate threshold line, clip to window, and convert to int
         pos_yt = (self.threshold_db - self.max_db) * scale
@@ -105,13 +106,13 @@ class SpectrumWindow(object):
             # Offset x (column) by 1 so it does not start on the border
             if pos_y[pos_x] > pos_yt:
                 # bar is below threshold, use low value color
-                self.win.vline(pos_y[pos_x], pos_x+1, "-", max_y-pos_y[pos_x],curses.color_pair(3))
+                self.win.vline(pos_y[pos_x], pos_x+1, "-", max_y-pos_y[pos_x],curses.color_pair(3) | curses.A_BOLD)
             elif pos_y[pos_x] <= min_y:
                 # bar is above max (clipped to min y), use max value color
-                self.win.vline(pos_y[pos_x], pos_x+1, "+", max_y-pos_y[pos_x],curses.color_pair(1))
+                self.win.vline(pos_y[pos_x], pos_x+1, "+", max_y-pos_y[pos_x],curses.color_pair(1) | curses.A_BOLD)
             else:
                 # bar is between max value and threshold, use threshold color
-                self.win.vline(pos_y[pos_x], pos_x+1, "*", max_y-pos_y[pos_x],curses.color_pair(2))
+                self.win.vline(pos_y[pos_x], pos_x+1, "*", max_y-pos_y[pos_x],curses.color_pair(2) | curses.A_BOLD)
 
 
         # Draw the max_db and min_db strings
@@ -124,7 +125,7 @@ class SpectrumWindow(object):
 
         # Draw the theshold line
         # x=1 start to account for left border
-        self.win.hline(pos_yt, 1, "-", len(pos_y))
+        self.win.hline(pos_yt, 1, "-", len(pos_y), curses.color_pair(2))
 
         # Draw the theshold string
         string = ">" + "%+03d" % self.threshold_db
@@ -204,8 +205,9 @@ class ChannelWindow(object):
 #        self.win.clear()
         self.win.erase()
         self.win.border(0)
-        self.win.addnstr(0, int(self.dims[1]/2-4), "CHANNELS", 8,
-                         curses.color_pair(4))
+        self.win.attron(curses.color_pair(6))
+        self.win.addnstr(0, int(self.dims[1]/3-3), "CHANNELS", 8,
+                         curses.color_pair(6) | curses.A_DIM | curses.A_BOLD)
 
         # Limit the displayed channels to no more than two rows
         max_length = 2*(self.dims[0]-2)
@@ -225,9 +227,9 @@ class ChannelWindow(object):
                 # text color based on activity
                 # curses.color_pair(5)
                 if gui_tuned_channel in active_channels:
-                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(2))
+                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(2) | curses.A_BOLD)
                 else:
-                    self.win.addnstr(idx+1, 1, text, 11)
+                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(6))
             else:
                 # Display in second column
                 self.win.addnstr(idx-self.dims[0]+3, 13, text, 11)
@@ -273,8 +275,9 @@ class LockoutWindow(object):
 #        self.win.clear()
         self.win.erase()
         self.win.border(0)
+        self.win.attron(curses.color_pair(6))
         self.win.addnstr(0, int(self.dims[1]/2-3), "LOCKOUT", 7,
-                         curses.color_pair(4))
+                         curses.color_pair(6) | curses.A_DIM | curses.A_BOLD)
 
         active_channels = set(gui_active_channels)
 
@@ -285,9 +288,9 @@ class LockoutWindow(object):
             if idx <= self.dims[0]-3:
                 text = "   " + gui_lockout_channel
                 if gui_lockout_channel in active_channels:
-                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(5))
+                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(5) | curses.A_BOLD)
                 else:
-                    self.win.addnstr(idx+1, 1, text, 11)
+                    self.win.addnstr(idx+1, 1, text, 11, curses.color_pair(6))
             else:
                 pass
 
@@ -357,6 +360,8 @@ class RxWindow(object):
 
         # Set default values
         self.center_freq = 146E6
+        self.min_freq = 144E6
+        self.max_freq = 148E6
         self.samp_rate = 2E6
         self.freq_entry = 'None'
         self.gain_db = 0
@@ -387,55 +392,64 @@ class RxWindow(object):
 #        self.win.clear()
         self.win.erase()
         self.win.border(0)
+        self.win.attron(curses.color_pair(6))
         self.win.addnstr(0, int(self.dims[1]/2-4), "RECEIVER", 8,
-                         curses.color_pair(4))
+                         curses.color_pair(6) | curses.A_DIM | curses.A_BOLD)
 
         # Draw the receiver info prefix fields
-        text = "RF Freq (MHz) : "
-        self.win.addnstr(1, 1, text, 15)
-        text = "RF Gain (dB)  : "
-        self.win.addnstr(2, 1, text, 15)
-        text = "IF Gain (dB)  : "
-        self.win.addnstr(3, 1, text, 15)
-        text = "BB Gain (dB)  : "
-        self.win.addnstr(4, 1, text, 15)   
-        text = "BB Rate (Msps): "
-        self.win.addnstr(5, 1, text, 15)
-        text = "BB Sql  (dB)  : "
-        self.win.addnstr(6, 1, text, 15)
-        text = "AF Vol  (dB)  : "
-        self.win.addnstr(7, 1, text, 15)
-        text = "Record        : "
-        self.win.addnstr(8, 1, text, 15)
-        text = "Demod Type    : "
-        self.win.addnstr(9, 1, text, 15)
-        text = "Files         : "
-        self.win.addnstr(10, 1, text, 15)
+        text = "RF Freq (MHz)  : "
+        self.win.addnstr(1, 1, text, 16, curses.color_pair(6))
+        text = "Min Freq (MHz) : "
+        self.win.addnstr(2, 1, text, 16, curses.color_pair(6))
+        text = "Max Freq (MHz) : "
+        self.win.addnstr(3, 1, text, 16, curses.color_pair(6))
+        text = "RF Gain (dB)   : "
+        self.win.addnstr(4, 1, text, 16, curses.color_pair(6))
+        text = "IF Gain (dB)   : "
+        self.win.addnstr(5, 1, text, 16, curses.color_pair(6))
+        text = "BB Gain (dB)   : "
+        self.win.addnstr(6, 1, text, 16, curses.color_pair(6))
+        text = "BB Rate (Msps) : "
+        self.win.addnstr(7, 1, text, 16, curses.color_pair(6))
+        text = "BB Sql  (dB)   : "
+        self.win.addnstr(8, 1, text, 16, curses.color_pair(6))
+        text = "AF Vol  (dB)   : "
+        self.win.addnstr(9, 1, text, 16, curses.color_pair(6))
+        text = "Record         : "
+        self.win.addnstr(10, 1, text, 16, curses.color_pair(6))
+        text = "Demod Type     : "
+        self.win.addnstr(11, 1, text, 16, curses.color_pair(6))
+        text = "Files          : "
+        self.win.addnstr(12, 1, text, 16, curses.color_pair(6))
 
         # Draw the receiver info suffix fields
         if self.freq_entry != 'None':
             text = self.freq_entry
         else:
             text = '{:.3f}'.format((self.center_freq)/1E6)
-        self.win.addnstr(1, 17, text, 8, curses.color_pair(5))
+        self.win.addnstr(1, 18, text, 8, curses.color_pair(5))
+        text = '{:.3f}'.format((self.min_freq)/1E6)
+        self.win.addnstr(2, 18, text, 8, curses.color_pair(6))
+        text = '{:.3f}'.format((self.max_freq)/1E6)
+        self.win.addnstr(3, 18, text, 8, curses.color_pair(6))
         text = str(self.gain_db)
-        self.win.addnstr(2, 17, text, 8, curses.color_pair(5))
+        self.win.addnstr(4, 18, text, 8, curses.color_pair(5))
         text = str(self.if_gain_db)
-        self.win.addnstr(3, 17, text, 8, curses.color_pair(5))
+        self.win.addnstr(5, 18, text, 8, curses.color_pair(5))
         text = str(self.bb_gain_db)
-        self.win.addnstr(4, 17, text, 8, curses.color_pair(5))
+        self.win.addnstr(6, 18, text, 8, curses.color_pair(5))
         text = str(self.samp_rate/1E6)
-        self.win.addnstr(5, 17, text, 8)
+        self.win.addnstr(7, 18, text, 8, curses.color_pair(6))
         text = str(self.squelch_db)
-        self.win.addnstr(6, 17, text, 8, curses.color_pair(5))
+        self.win.addnstr(8, 18, text, 8, curses.color_pair(5))
         text = str(self.volume_db)
-        self.win.addnstr(7, 17, text, 8, curses.color_pair(5))
+        self.win.addnstr(9, 18, text, 8, curses.color_pair(5))
         text = str(self.record)
-        self.win.addnstr(8, 17, text, 8)
+        self.win.addnstr(10, 18, text, 8, curses.color_pair(6))
         text = str(self.type_demod)
-        self.win.addnstr(9, 17, text, 8)
+        self.win.addnstr(11, 18, text, 8, curses.color_pair(6))
         text = str(self.lockout_file_name) + " " + str(self.priority_file_name)
-        self.win.addnstr(10, 17, text, 20)
+        self.win.addnstr(12, 18, text, 20, curses.color_pair(6))
 
         # Hide cursor
         self.win.leaveok(1)
@@ -604,12 +618,20 @@ def setup_screen(screen):
     # hide cursor
     curses.curs_set(0)
 
+    # do not echo keystrokes
+    curses.noecho()
+
+    # break on ctrl-c
+    curses.cbreak()
+
     # Define some colors
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
     curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(7, curses.COLOR_BLUE, curses.COLOR_BLACK)
 
     # Add border
     screen.border(0)
@@ -634,7 +656,7 @@ def main():
     # Setup the screen
     setup_screen(screen)
 
-    # Create windows
+# Create windows
     specwin = SpectrumWindow(screen)
     chanwin = ChannelWindow(screen)
     lockoutwin = LockoutWindow(screen)
