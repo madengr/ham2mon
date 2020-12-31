@@ -37,12 +37,24 @@ madengr:
 - Priority channels
 
 ta6o:
-- initial python3 fixes for syntax
+- Initial python3 fixes for syntax
+
+kibihrchak:
+- Logger branch text file log entries (pending pull into lordmorgul repo)
+
+john:
+- long running file end (pending pull into lordmorgul repo)
 
 lordmorgul:
-- min and max spectrum switches
-- python3 builtin functions correction for priority and lockout parsing
-- example priority and lockout files
+- Min and max spectrum switches
+- Python3 builtin functions correction for priority and lockout parsing
+- Example priority and lockout files
+- Spectrum bar coloration (min/threshold/max)
+- Active channel tracking and coloration
+- GUI adjustments in channel and receiver windows, borders and labels
+- priority, lockout, and text log file name displays
+- log file framework with enable flags (to prepare for multiple loggers implemented, text and database)
+ 
 
 ## Console Operation:
 
