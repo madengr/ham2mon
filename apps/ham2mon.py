@@ -52,6 +52,7 @@ def main(screen):
     play = PARSER.play
     lockout_file_name = PARSER.lockout_file_name
     priority_file_name = PARSER.priority_file_name
+    #log_file_name = PARSER.log_file_name
     freq_correction = PARSER.freq_correction
     audio_bps = PARSER.audio_bps
     scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
@@ -69,6 +70,8 @@ def main(screen):
 
     # Get the initial settings for GUI
     rxwin.center_freq = scanner.center_freq
+    rxwin.min_freq = scanner.min_freq
+    rxwin.max_freq = scanner.max_freq
     rxwin.samp_rate = scanner.samp_rate
     rxwin.gain_db = scanner.gain_db
     rxwin.if_gain_db = scanner.if_gain_db
@@ -79,6 +82,7 @@ def main(screen):
     rxwin.type_demod = type_demod
     rxwin.lockout_file_name = scanner.lockout_file_name
     rxwin.priority_file_name = scanner.priority_file_name
+    #rxwin.log_file_name = scanner.log_file_name
 
     specwin.max_db = PARSER.max_db
     specwin.min_db = PARSER.min_db
@@ -103,6 +107,9 @@ def main(screen):
         # Get keystroke
         keyb = screen.getch()
 
+        if keyb == ord('Q'):
+            break
+
         # Send keystroke to spectrum window and update scanner if True
         if specwin.proc_keyb(keyb):
             scanner.set_threshold(specwin.threshold_db)
@@ -112,6 +119,8 @@ def main(screen):
             # Set and update frequency
             scanner.set_center_freq(rxwin.center_freq)
             rxwin.center_freq = scanner.center_freq
+            rxwin.min_freq = scanner.min_freq
+            rxwin.max_freq = scanner.max_freq
 
         if rxwin.proc_keyb_soft(keyb):
             # Set and update RF gain
@@ -153,4 +162,10 @@ if __name__ == '__main__':
         print("")
         print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
         print("")
+
+    finally:
+        # --- Cleanup on exit ---
+        curses.echo()
+        curses.nocbreak()
+        curses.endwin()
 

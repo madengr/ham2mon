@@ -111,10 +111,21 @@ class Scanner(object):
         # Get the hardware sample rate and center frequency
         self.samp_rate = self.receiver.samp_rate
         self.center_freq = self.receiver.center_freq
+        self.min_freq = (self.center_freq - self.samp_rate/2)
+        self.max_freq = (self.center_freq + self.samp_rate/2)
 
         # Start the receiver and wait for samples to accumulate
         self.receiver.start()
         time.sleep(1)
+
+        self.spectrum = self.receiver.probe_signal_vf.level()
+
+#        # removed this since its essentially the same as above and this required spectrum first
+#        # estimate min/max frequency based on spectrum length and sample rate
+#        self.min_freq = ((0 - len(self.spectrum)/2) * (self.samp_rate / len(self.spectrum) \
+#                + self.center_freq))
+#        self.max_freq = ((len(self.spectrum) - len(self.spectrum)/2) * (self.samp_rate / len(self.spectrum) \
+#                + self.center_freq))
 
     def scan_cycle(self):
         """Execute one scan cycle
@@ -141,9 +152,7 @@ class Scanner(object):
         # Grab the FFT data, set threshold, and estimate baseband channels
         self.spectrum = self.receiver.probe_signal_vf.level()
         threshold = 10**(self.threshold_db/10.0)
-        channels = np.array(estimate.channel_estimate(self.spectrum,
-                                                      threshold))
-
+        channels = np.array(estimate.channel_estimate(self.spectrum, threshold))
 
         # Convert channels from bin indices to baseband frequency in Hz
         channels = (channels-len(self.spectrum)/2)*\
@@ -317,6 +326,10 @@ class Scanner(object):
         # Tune the receiver then update with actual frequency
         self.receiver.set_center_freq(center_freq)
         self.center_freq = self.receiver.center_freq
+
+        # reset min/max based on sample rate
+        self.min_freq = (self.center_freq - self.samp_rate/2)
+        self.max_freq = (self.center_freq + self.samp_rate/2)
 
         # Update the priority since frequency is changing
         self.update_priority()

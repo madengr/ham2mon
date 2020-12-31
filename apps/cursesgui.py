@@ -89,6 +89,7 @@ class SpectrumWindow(object):
 
          # Clear previous contents, draw border, and title
 #        self.win.clear()
+        # using erase prevents jitter in some terminals compared to clear() directly
         self.win.erase()
         self.win.border(0)
         self.win.attron(curses.color_pair(6))
@@ -203,10 +204,11 @@ class ChannelWindow(object):
 
         # Clear previous contents, draw border, and title
 #        self.win.clear()
+        # using erase prevents jitter in some terminals compared to clear() directly
         self.win.erase()
         self.win.border(0)
         self.win.attron(curses.color_pair(6))
-        self.win.addnstr(0, int(self.dims[1]/3-3), "CHANNELS", 8,
+        self.win.addnstr(0, int(self.dims[1]/4), "CHANNELS", 8,
                          curses.color_pair(6) | curses.A_DIM | curses.A_BOLD)
 
         # Limit the displayed channels to no more than two rows
@@ -221,7 +223,8 @@ class ChannelWindow(object):
         # Draw the tuned channels prefixed by index in list (demodulator index)
         # Use color if tuned channel is in active channel list during this scan_cycle
         for idx, gui_tuned_channel in enumerate(gui_tuned_channels):
-            text = str(idx) + ": " + gui_tuned_channel
+            text = str(idx)
+            text = text.zfill(2) + ": " + gui_tuned_channel
             if idx < self.dims[0]-2:
                 # Display in first column
                 # text color based on activity
@@ -273,6 +276,7 @@ class LockoutWindow(object):
         """
         # Clear previous contents, draw border, and title
 #        self.win.clear()
+        # using erase prevents jitter in some terminals compared to clear() directly
         self.win.erase()
         self.win.border(0)
         self.win.attron(curses.color_pair(6))
@@ -373,6 +377,7 @@ class RxWindow(object):
         self.record = True
         self.lockout_file_name = ""
         self.priority_file_name = ""
+#        self.log_file_name = ""
 
         # Create a window object in the bottom half of the screen
         # Make it about 1/3 the screen width
@@ -390,6 +395,7 @@ class RxWindow(object):
 
         # Clear previous contents, draw border, and title
 #        self.win.clear()
+        # using erase prevents jitter in some terminals compared to clear() directly
         self.win.erase()
         self.win.border(0)
         self.win.attron(curses.color_pair(6))
@@ -398,58 +404,74 @@ class RxWindow(object):
 
         # Draw the receiver info prefix fields
         text = "RF Freq (MHz)  : "
-        self.win.addnstr(1, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(1, 1, text, 18, curses.color_pair(6))
         text = "Min Freq (MHz) : "
-        self.win.addnstr(2, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(2, 1, text, 18, curses.color_pair(6))
         text = "Max Freq (MHz) : "
-        self.win.addnstr(3, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(3, 1, text, 18, curses.color_pair(6))
         text = "RF Gain (dB)   : "
-        self.win.addnstr(4, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(4, 1, text, 18, curses.color_pair(6))
         text = "IF Gain (dB)   : "
-        self.win.addnstr(5, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(5, 1, text, 18, curses.color_pair(6))
         text = "BB Gain (dB)   : "
-        self.win.addnstr(6, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(6, 1, text, 18, curses.color_pair(6))
         text = "BB Rate (Msps) : "
-        self.win.addnstr(7, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(7, 1, text, 18, curses.color_pair(6))
         text = "BB Sql  (dB)   : "
-        self.win.addnstr(8, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(8, 1, text, 18, curses.color_pair(6))
         text = "AF Vol  (dB)   : "
-        self.win.addnstr(9, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(9, 1, text, 18, curses.color_pair(6))
         text = "Record         : "
-        self.win.addnstr(10, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(10, 1, text, 18, curses.color_pair(6))
         text = "Demod Type     : "
-        self.win.addnstr(11, 1, text, 16, curses.color_pair(6))
-        text = "Files          : "
-        self.win.addnstr(12, 1, text, 16, curses.color_pair(6))
+        self.win.addnstr(11, 1, text, 18, curses.color_pair(6))
+        text = "Lockout File   : "
+        self.win.addnstr(12, 1, text, 18, curses.color_pair(6))
+        text = "Priority File  : "
+        self.win.addnstr(13, 1, text, 18, curses.color_pair(6))
+#        text = "Log File       : "
+#        self.win.addnstr(14, 1, text, 18, curses.color_pair(6))
+#        text = "Log Mode       : "
+#        self.win.addnstr(15, 1, text, 18, curses.color_pair(6))
+#        text = "Log Interval   : "
+#        self.win.addnstr(16, 1, text, 18, curses.color_pair(6))
 
         # Draw the receiver info suffix fields
         if self.freq_entry != 'None':
             text = self.freq_entry
         else:
             text = '{:.3f}'.format((self.center_freq)/1E6)
-        self.win.addnstr(1, 18, text, 8, curses.color_pair(5))
+        self.win.addnstr(1, 20, text, 8, curses.color_pair(5))
         text = '{:.3f}'.format((self.min_freq)/1E6)
-        self.win.addnstr(2, 18, text, 8, curses.color_pair(6))
+        self.win.addnstr(2, 20, text, 8, curses.color_pair(6))
         text = '{:.3f}'.format((self.max_freq)/1E6)
-        self.win.addnstr(3, 18, text, 8, curses.color_pair(6))
+        self.win.addnstr(3, 20, text, 8, curses.color_pair(6))
         text = str(self.gain_db)
-        self.win.addnstr(4, 18, text, 8, curses.color_pair(5))
+        self.win.addnstr(4, 20, text, 8, curses.color_pair(5))
         text = str(self.if_gain_db)
-        self.win.addnstr(5, 18, text, 8, curses.color_pair(5))
+        self.win.addnstr(5, 20, text, 8, curses.color_pair(5))
         text = str(self.bb_gain_db)
-        self.win.addnstr(6, 18, text, 8, curses.color_pair(5))
+        self.win.addnstr(6, 20, text, 8, curses.color_pair(5))
         text = str(self.samp_rate/1E6)
-        self.win.addnstr(7, 18, text, 8, curses.color_pair(6))
+        self.win.addnstr(7, 20, text, 8, curses.color_pair(6))
         text = str(self.squelch_db)
-        self.win.addnstr(8, 18, text, 8, curses.color_pair(5))
+        self.win.addnstr(8, 20, text, 8, curses.color_pair(5))
         text = str(self.volume_db)
-        self.win.addnstr(9, 18, text, 8, curses.color_pair(5))
+        self.win.addnstr(9, 20, text, 8, curses.color_pair(5))
         text = str(self.record)
-        self.win.addnstr(10, 18, text, 8, curses.color_pair(6))
+        self.win.addnstr(10, 20, text, 8, curses.color_pair(6))
         text = str(self.type_demod)
-        self.win.addnstr(11, 18, text, 8, curses.color_pair(6))
-        text = str(self.lockout_file_name) + " " + str(self.priority_file_name)
-        self.win.addnstr(12, 18, text, 20, curses.color_pair(6))
+        self.win.addnstr(11, 20, text, 8, curses.color_pair(6))
+        text = str(self.lockout_file_name)
+        self.win.addnstr(12, 20, text, 20, curses.color_pair(6))
+        text = str(self.priority_file_name)
+        self.win.addnstr(13, 20, text, 20, curses.color_pair(6))
+#        text = str(self.log_file_name)
+#        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
+#        text = str(self.log_mode)
+#        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
+#        text = str(self.log_interval)
+#        self.win.addnstr(15, 20, text, 20, curses.color_pair(6))
 
         # Hide cursor
         self.win.leaveok(1)
@@ -636,6 +658,7 @@ def setup_screen(screen):
     # Add border
     screen.border(0)
 
+
 def main():
     """Test most of the GUI (except lockout processing)
 
@@ -655,6 +678,7 @@ def main():
 
     # Setup the screen
     setup_screen(screen)
+
 
 # Create windows
     specwin = SpectrumWindow(screen)
@@ -688,6 +712,9 @@ def main():
         specwin.proc_keyb(keyb)
         rxwin.proc_keyb_hard(keyb)
         rxwin.proc_keyb_soft(keyb)
+
+        if keyb == ord('Q'):
+            break
 
         # Sleep to get about a 10 Hz refresh
         time.sleep(0.1)

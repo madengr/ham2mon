@@ -405,7 +405,7 @@ class Receiver(gr.top_block):
         gr.top_block.__init__(self, "Receiver")
 
         # Default values
-        self.center_freq = 144E6
+        self.center_freq = 146E6
         self.gain_db = 0
         self.if_gain_db = 16
         self.bb_gain_db = 16
@@ -582,7 +582,7 @@ def main():
     """
 
     # Create receiver object
-    ask_samp_rate = 4E6
+    ask_samp_rate = 2E6
     num_demod = 4
     type_demod = 0
     hw_args = "uhd"
