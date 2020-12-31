@@ -377,7 +377,7 @@ class RxWindow(object):
         self.record = True
         self.lockout_file_name = ""
         self.priority_file_name = ""
-#        self.log_file_name = ""
+        self.channel_log_file_name = ""
 
         # Create a window object in the bottom half of the screen
         # Make it about 1/3 the screen width
@@ -429,8 +429,8 @@ class RxWindow(object):
         self.win.addnstr(12, 1, text, 18, curses.color_pair(6))
         text = "Priority File  : "
         self.win.addnstr(13, 1, text, 18, curses.color_pair(6))
-#        text = "Log File       : "
-#        self.win.addnstr(14, 1, text, 18, curses.color_pair(6))
+        text = "Log File       : "
+        self.win.addnstr(14, 1, text, 18, curses.color_pair(6))
 #        text = "Log Mode       : "
 #        self.win.addnstr(15, 1, text, 18, curses.color_pair(6))
 #        text = "Log Interval   : "
@@ -466,8 +466,8 @@ class RxWindow(object):
         self.win.addnstr(12, 20, text, 20, curses.color_pair(6))
         text = str(self.priority_file_name)
         self.win.addnstr(13, 20, text, 20, curses.color_pair(6))
-#        text = str(self.log_file_name)
-#        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
+        text = str(self.channel_log_file_name)
+        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
 #        text = str(self.log_mode)
 #        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
 #        text = str(self.log_interval)

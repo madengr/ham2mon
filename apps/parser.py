@@ -93,6 +93,11 @@ class CLParser(object):
                           default="",
                           help="File of EOL delimited priority channels in Hz")
 
+        parser.add_option("-L", "--log_file", type="string",
+                           dest="channel_log_file_name",
+                           default="",
+                           help="Log file for channel detection")
+
         parser.add_option("-c", "--correction", type="int", dest="freq_correction",
                           default=0,
                           help="Frequency correction in ppm")
@@ -132,6 +137,7 @@ class CLParser(object):
         self.play = bool(options.play)
         self.lockout_file_name = str(options.lockout_file_name)
         self.priority_file_name = str(options.priority_file_name)
+        self.channel_log_file_name = str(options.channel_log_file_name)
         self.freq_correction = int(options.freq_correction)
         self.audio_bps = int(options.audio_bps)
         self.max_db = float(options.max_db)
@@ -161,6 +167,7 @@ def main():
     print("record:              " + str(parser.record))
     print("lockout_file_name:   " + str(parser.lockout_file_name))
     print("priority_file_name:  " + str(parser.priority_file_name))
+    print("channel_log_file_name:  " + str(parser.channel_log_file_name))
     print("freq_correction:     " + str(parser.freq_correction))
     print("audio_bps:           " + str(parser.audio_bps))
     print("max_db:              " + str(parser.max_db))
