@@ -11,6 +11,7 @@ import curses
 import cursesgui
 import parser
 import time
+import errors as err
 
 def main(screen):
     """Start scanner with GUI interface
@@ -165,6 +166,11 @@ if __name__ == '__main__':
         print("")
         print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
         print("")
+    except LogError:
+        print("")
+        print("LogError: database logging not active, to be expanded.")
+        print("")
+
 
     finally:
         # --- Cleanup on exit ---

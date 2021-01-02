@@ -14,6 +14,7 @@ import numpy as np
 import sys
 import types
 import datetime
+import errors as err
 
 PY3 = sys.version_info[0] == 3
 PY2 = sys.version_info[0] == 2
@@ -112,7 +113,7 @@ class Scanner(object):
         self.channel_log_timeout = channel_log_timeout
         self.log_recent_channels = []
         self.log_timeout_last = int(time.time())
-
+        self.log_mode = ""
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
@@ -122,6 +123,13 @@ class Scanner(object):
         # Open channel log file for appending data, if it is specified
         if channel_log_file_name != "":
             self.channel_log_file = open(channel_log_file_name, 'a')
+            if self.channel_log_file != None:
+                self.log_mode = "file"
+            else:
+                # Opening log file failed so cannot perform this log mode
+                # Either raise exception or continue without logging, second preferable
+                self.log_mode = ""
+                #raise(LogError("file","Cannot open log file"))
         else:
             self.channel_log_file = None
 
@@ -152,29 +160,44 @@ class Scanner(object):
            self.channel_log_file.close()
 
     def __print_channel_log_active__(self, freq, state):
-        if self.channel_log_file is not None:
-            state_str = {True: "active", False: "off"}
+        if self.log_mode is not None and state is True:
+            state_str = {True: "act", False: "off"}
             now = datetime.datetime.now()
-            self.channel_log_file.write(
-                    "{}: {:<4}{:>13}{:>7}{:>7}{:>7}\n".format(
-                        now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
-                        state_str[state],
-                        self.center_freq + freq,
-                        self.gain_db,
-                        self.threshold_db,
-                        self.channel_log_timeout))
+            if self.log_mode == "file" and self.channel_log_file is not None:
+                self.channel_log_file.write(
+                        "{}: {:<4}{:>13}{:>7}{:>7}{:>7}\n".format(
+                            now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
+                            state_str[state],
+                            self.center_freq + freq,
+                            self.gain_db,
+                            self.threshold_db,
+                            self.channel_log_timeout))
+            elif self.log_mode == "db":
+                # write log to db
+                raise(err.LogError("db","no db mode implemented"))
+            else:
+                # cannot log unknown mode
+                raise(err.LogError("unknown","no log mode defined"))
 
     def __print_channel_log__(self, freq, state):
-        if self.channel_log_file is not None:
+        if self.log_mode is not None:
             state_str = {True: "on", False: "off"}
             now = datetime.datetime.now()
-            self.channel_log_file.write(
-                    "{}: {:<4}{:>13}{:>7}{:>7}\n".format(
-                        now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
-                        state_str[state],
-                        self.center_freq + freq,
-                        self.gain_db,
-                        self.threshold_db))
+            if self.log_mode == "file" and self.channel_log_file is not None:
+                self.channel_log_file.write(
+                        "{}: {:<4}{:>13}{:>7}{:>7}\n".format(
+                            now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
+                            state_str[state],
+                            self.center_freq + freq,
+                            self.gain_db,
+                            self.threshold_db))
+            elif self.log_mode == "db":
+                # write log to db
+                raise(err.LogError("db","no db mode implemented"))
+            else:
+                # cannot log unknown mode
+                raise(err.LogError("unknown","no log mode defined"))
+
 
     def scan_cycle(self):
         """Execute one scan cycle
@@ -243,7 +266,6 @@ class Scanner(object):
                 # Write in channel log file that the channel is off
                 demodulator_freq = demodulator.center_freq
                 self.__print_channel_log__(demodulator_freq, False)
-
             else:
                 pass
 
@@ -287,22 +309,23 @@ class Scanner(object):
             gui_active_channel = (channel + self.center_freq)/1E6
             text = '{:.3f}'.format(gui_active_channel)
             self.gui_active_channels.append(text)
-            self.log_recent_channels.append(gui_active_channel)
+            # Add active channel to recent list for logging if not already there
+            if gui_active_channel not in self.log_recent_channels:
+                self.log_recent_channels.append(gui_active_channel)
 
         # log recently active channels if we are beyond timeout delay from last logging
         cur_timestamp = int(time.time())
         # if cur_timestamp > timeout_timestamp + timeout
         if cur_timestamp > (self.log_timeout_last + self.channel_log_timeout):
+            # set last timeout to this timestamp
+            self.log_timeout_last = cur_timestamp
             # iterate all recent channels print to log
             for channel in self.log_recent_channels:
                 text = '{:.3f}'.format(channel)
                 # Write in channel log file that the channel is on
                 self.__print_channel_log_active__(channel, True)
-
             # clear recent channels
             self.log_recent_channels = []
-            # set last timeout to this timestamp
-            self.log_timeout_last = cur_timestamp
 
 
 
