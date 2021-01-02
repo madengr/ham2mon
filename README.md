@@ -40,7 +40,7 @@ ta6o:
 - Initial python3 fixes for syntax
 
 kibihrchak:
-- Logger branch text file log entries (pending pull into lordmorgul repo)
+- Logger branch text file log entries
 
 john:
 - long running file end (pending pull into lordmorgul repo)
@@ -77,6 +77,12 @@ sudo rmmod dvb_usb_rtl28xxu
 Example of reading from an IQ file:
 
 ./ham2mon.py -a "file=gqrx.raw,rate=8E6,repeat=false,throttle=true,freq=466E6" -r 8E6 -w
+
+##Channel Detection Log File
+
+For console operation, it is possible to specify the log file name, in which channel detection, and removal will be logged. The option is `--log_file=<file-name>`.
+
+Whenever a channel appears/dissapears, new line will be written in the log file. For the line format, check `__print_channel_log__()` in `scanner.Scanner`.
 
 ## GUI Controls:
 
@@ -160,6 +166,12 @@ Example of reading from an IQ file:
 
 `  -p PRIORITY_FILE_NAME, --priority=PRIORITY_FILE_NAME`
 `                        File of EOL delimited priority channels in Hz`
+
+`  -L CHANNEL_LOG_FILE_NAME, --log-file=CHANNEL_LOG_FILE_NAME`
+`                        File for output of channel activity (demod lock/unlock) and active channels detection`
+
+`  -A LOG_ACTIVE_TIMEOUT, --log_active_timeout=LOG_ACTIVE_TIMEOUT`
+`                        Timeout delay between marking a channel active in the log file in seconds`
 
 `  -c FREQ_CORRECTION, --correction=FREQ_CORRECTION`
 `                        Frequency correction in ppm`

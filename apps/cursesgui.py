@@ -378,6 +378,7 @@ class RxWindow(object):
         self.lockout_file_name = ""
         self.priority_file_name = ""
         self.channel_log_file_name = ""
+        self.channel_log_timeout = 15
 
         # Create a window object in the bottom half of the screen
         # Make it about 1/3 the screen width
@@ -431,9 +432,9 @@ class RxWindow(object):
         self.win.addnstr(13, 1, text, 18, curses.color_pair(6))
         text = "Log File       : "
         self.win.addnstr(14, 1, text, 18, curses.color_pair(6))
+        text = "Log Timeout (s): "
+        self.win.addnstr(15, 1, text, 18, curses.color_pair(6))
 #        text = "Log Mode       : "
-#        self.win.addnstr(15, 1, text, 18, curses.color_pair(6))
-#        text = "Log Interval   : "
 #        self.win.addnstr(16, 1, text, 18, curses.color_pair(6))
 
         # Draw the receiver info suffix fields
@@ -468,10 +469,10 @@ class RxWindow(object):
         self.win.addnstr(13, 20, text, 20, curses.color_pair(6))
         text = str(self.channel_log_file_name)
         self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
+        text = str(self.channel_log_timeout)
+        self.win.addnstr(15, 20, text, 20, curses.color_pair(6))
 #        text = str(self.log_mode)
-#        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
-#        text = str(self.log_interval)
-#        self.win.addnstr(15, 20, text, 20, curses.color_pair(6))
+#        self.win.addnstr(16, 20, text, 20, curses.color_pair(6))
 
         # Hide cursor
         self.win.leaveok(1)

@@ -53,11 +53,13 @@ def main(screen):
     lockout_file_name = PARSER.lockout_file_name
     priority_file_name = PARSER.priority_file_name
     channel_log_file_name = PARSER.channel_log_file_name
+    channel_log_timeout = PARSER.channel_log_timeout
     freq_correction = PARSER.freq_correction
     audio_bps = PARSER.audio_bps
     scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                            freq_correction, record, lockout_file_name,
-                           priority_file_name, channel_log_file_name, play, audio_bps)
+                           priority_file_name, channel_log_file_name, channel_log_timeout,
+                           play, audio_bps)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)
@@ -83,6 +85,7 @@ def main(screen):
     rxwin.lockout_file_name = scanner.lockout_file_name
     rxwin.priority_file_name = scanner.priority_file_name
     rxwin.channel_log_file_name = scanner.channel_log_file_name
+    rxwin.channel_log_timeout = scanner.channel_log_timeout
 
     specwin.max_db = PARSER.max_db
     specwin.min_db = PARSER.min_db

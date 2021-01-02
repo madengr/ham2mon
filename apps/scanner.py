@@ -75,6 +75,9 @@ class Scanner(object):
         channel_spacing (float):  Spacing that channels will be rounded
         lockout_file_name (string): Name of file with channels to lockout
         priority_file_name (string): Name of file with channels for priority
+        channel_log_file_name (string): Name of file with channel log entries
+        channel_log_timeout (int): Timeout delay between active channel entries in log
+        log_timeout_last (int): Last timestamp when recently active channels were logged and cleared
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
@@ -82,7 +85,8 @@ class Scanner(object):
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
                  hw_args="uhd", freq_correction=0, record=True,
                  lockout_file_name="", priority_file_name="",
-                 channel_log_file_name="", play=True,
+                 channel_log_file_name="", channel_log_timeout=15,
+                 play=True,
                  audio_bps=8):
 
         # Default values
@@ -105,6 +109,10 @@ class Scanner(object):
         self.lockout_file_name = lockout_file_name
         self.priority_file_name = priority_file_name
         self.channel_log_file_name = channel_log_file_name
+        self.channel_log_timeout = channel_log_timeout
+        self.log_recent_channels = []
+        self.log_timeout_last = int(time.time())
+
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
@@ -142,6 +150,19 @@ class Scanner(object):
     def __del__(self):
         if self.channel_log_file != None :
            self.channel_log_file.close()
+
+    def __print_channel_log_active__(self, freq, state):
+        if self.channel_log_file is not None:
+            state_str = {True: "active", False: "off"}
+            now = datetime.datetime.now()
+            self.channel_log_file.write(
+                    "{}: {:<4}{:>13}{:>7}{:>7}{:>7}\n".format(
+                        now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
+                        state_str[state],
+                        self.center_freq + freq,
+                        self.gain_db,
+                        self.threshold_db,
+                        self.channel_log_timeout))
 
     def __print_channel_log__(self, freq, state):
         if self.channel_log_file is not None:
@@ -266,6 +287,23 @@ class Scanner(object):
             gui_active_channel = (channel + self.center_freq)/1E6
             text = '{:.3f}'.format(gui_active_channel)
             self.gui_active_channels.append(text)
+            self.log_recent_channels.append(gui_active_channel)
+
+        # log recently active channels if we are beyond timeout delay from last logging
+        cur_timestamp = int(time.time())
+        # if cur_timestamp > timeout_timestamp + timeout
+        if cur_timestamp > (self.log_timeout_last + self.channel_log_timeout):
+            # iterate all recent channels print to log
+            for channel in self.log_recent_channels:
+                text = '{:.3f}'.format(channel)
+                # Write in channel log file that the channel is on
+                self.__print_channel_log_active__(channel, True)
+
+            # clear recent channels
+            self.log_recent_channels = []
+            # set last timeout to this timestamp
+            self.log_timeout_last = cur_timestamp
+
 
 
     def add_lockout(self, idx):
@@ -457,10 +495,12 @@ def main():
     record = parser.record
     lockout_file_name = parser.lockout_file_name
     priority_file_name = parser.priority_file_name
+    channel_log_file_name = parser.channel_log_file_name
     audio_bps = parser.audio_bps
     scanner = Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                       freq_correction, record, lockout_file_name,
-                      priority_file_name, audio_bps)
+                      priority_file_name, channel_log_file_name,
+                      audio_bps)
 
     # Set frequency, gain, squelch, and volume
     scanner.set_center_freq(parser.center_freq)

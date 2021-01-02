@@ -25,6 +25,8 @@ class CLParser(object):
         play (bool): Play audio through speaker if True
         lockout_file_name (string): Name of file with channels to lockout
         priority_file_name (string): Name of file with channels to for priority
+        channel_log_file_name (string): Name of file for channel logging
+        channel_log_timeout (int): Timeout delay between active channel log entries
         freq_correction (int): Frequency correction in ppm
         audio_bps (int): Audio bit depth in bps
         max_db (float): Spectrum max dB for display
@@ -98,6 +100,11 @@ class CLParser(object):
                            default="",
                            help="Log file for channel detection")
 
+        parser.add_option("-A", "--log_active_timeout", type="int",
+                           dest="channel_log_timeout",
+                           default=15,
+                           help="Timeout delay for active channel log entries")
+
         parser.add_option("-c", "--correction", type="int", dest="freq_correction",
                           default=0,
                           help="Frequency correction in ppm")
@@ -138,6 +145,7 @@ class CLParser(object):
         self.lockout_file_name = str(options.lockout_file_name)
         self.priority_file_name = str(options.priority_file_name)
         self.channel_log_file_name = str(options.channel_log_file_name)
+        self.channel_log_timeout = int(options.channel_log_timeout)
         self.freq_correction = int(options.freq_correction)
         self.audio_bps = int(options.audio_bps)
         self.max_db = float(options.max_db)
@@ -168,6 +176,7 @@ def main():
     print("lockout_file_name:   " + str(parser.lockout_file_name))
     print("priority_file_name:  " + str(parser.priority_file_name))
     print("channel_log_file_name:  " + str(parser.channel_log_file_name))
+    print("channel_log_timeout:  " + str(parser.channel_log_timeout))
     print("freq_correction:     " + str(parser.freq_correction))
     print("audio_bps:           " + str(parser.audio_bps))
     print("max_db:              " + str(parser.max_db))
