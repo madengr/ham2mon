@@ -165,10 +165,10 @@ class Scanner(object):
             now = datetime.datetime.now()
             if self.log_mode == "file" and self.channel_log_file is not None:
                 self.channel_log_file.write(
-                        "{}: {:<4}{:>13}{:>7}{:>7}{:>7}\n".format(
+                        "{}: {:<4}{:>13}{:>7} dB {:>7} dB timeout {:>3}\n".format(
                             now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
                             state_str[state],
-                            self.center_freq + freq,
+                            freq,
                             self.gain_db,
                             self.threshold_db,
                             self.channel_log_timeout))
@@ -179,18 +179,21 @@ class Scanner(object):
                 # cannot log unknown mode
                 raise(err.LogError("unknown","no log mode defined"))
 
-    def __print_channel_log__(self, freq, state):
+    def __print_channel_log__(self, freq, state, idx):
         if self.log_mode is not None:
             state_str = {True: "on", False: "off"}
+            if state == False:
+                freq = 0
             now = datetime.datetime.now()
             if self.log_mode == "file" and self.channel_log_file is not None:
                 self.channel_log_file.write(
-                        "{}: {:<4}{:>13}{:>7}{:>7}\n".format(
+                        "{}: {:<4}{:>13}{:>7} dB {:>7} dB channel {:>3}\n".format(
                             now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
                             state_str[state],
-                            self.center_freq + freq,
+                            freq,
                             self.gain_db,
-                            self.threshold_db))
+                            self.threshold_db,
+                            idx))
             elif self.log_mode == "db":
                 # write log to db
                 raise(err.LogError("db","no db mode implemented"))
@@ -260,12 +263,14 @@ class Scanner(object):
         channels = temp
 
         # Set demodulators that are no longer in channel list to 0 Hz
-        for demodulator in self.receiver.demodulators:
-            if demodulator.center_freq not in channels:
+        #for demodulator in self.receiver.demodulators:
+        for idx in range(len(self.receiver.demodulators)):
+            demodulator = self.receiver.demodulators[idx]
+            if (demodulator.center_freq != 0) and (demodulator.center_freq not in channels):
                 demodulator.set_center_freq(0, self.center_freq)
                 # Write in channel log file that the channel is off
                 demodulator_freq = demodulator.center_freq
-                self.__print_channel_log__(demodulator_freq, False)
+                self.__print_channel_log__(demodulator_freq + self.center_freq, False, idx)
             else:
                 pass
 
@@ -274,14 +279,17 @@ class Scanner(object):
             # If channel not in demodulators
             if channel not in self.receiver.get_demod_freqs():
                 # Sequence through each demodulator
-                for demodulator in self.receiver.demodulators:
+                #for demodulator in self.receiver.demodulators:
+                for idx in range(len(self.receiver.demodulators)):
+                    demodulator = self.receiver.demodulators[idx]
                     # If demodulator is empty and channel not already there
                     if (demodulator.center_freq == 0) and \
                             (channel not in self.receiver.get_demod_freqs()):
                         # Write in channel log file that the channel is on
-                        self.__print_channel_log__(channel, True)
+                        self.__print_channel_log__(channel + self.center_freq, True, idx)
                         # Assigning channel to empty demodulator
                         demodulator.set_center_freq(channel, self.center_freq)
+                        break
                     else:
                         pass
             else:
@@ -314,6 +322,8 @@ class Scanner(object):
                 self.log_recent_channels.append(gui_active_channel)
 
         # log recently active channels if we are beyond timeout delay from last logging
+        # clear list of recently active channels after logging
+        # reset timeout (a low fidelity/effort timer)
         cur_timestamp = int(time.time())
         # if cur_timestamp > timeout_timestamp + timeout
         if cur_timestamp > (self.log_timeout_last + self.channel_log_timeout):
@@ -321,9 +331,8 @@ class Scanner(object):
             self.log_timeout_last = cur_timestamp
             # iterate all recent channels print to log
             for channel in self.log_recent_channels:
-                text = '{:.3f}'.format(channel)
                 # Write in channel log file that the channel is on
-                self.__print_channel_log_active__(channel, True)
+                self.__print_channel_log_active__(float(channel)*1E6, True)
             # clear recent channels
             self.log_recent_channels = []
 

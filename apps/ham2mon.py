@@ -166,7 +166,7 @@ if __name__ == '__main__':
         print("")
         print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
         print("")
-    except LogError:
+    except err.LogError:
         print("")
         print("LogError: database logging not active, to be expanded.")
         print("")
