@@ -3,7 +3,13 @@ This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily me
 
 http://youtu.be/BXptQFSV8E4
 
-![GUI screenshot](https://github.com/madengr/ham2mon/blob/master/ham2mon.png)
+Original screenshot
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon.png)
+
+Additional screenshots show updated screen color and channel highlighting with 
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_inactive_noise.png)
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_active.png)
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_overmax.png)
 
 ## Tested with:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
@@ -13,6 +19,26 @@ http://youtu.be/BXptQFSV8E4
 - Ettus UHD 3.10.0 (https://github.com/EttusResearch/uhd)
 
 ## Contributors:
+lordmorgul:
+- Min and max spectrum switches
+- Python3 builtin functions correction for priority and lockout parsing
+- Example priority and lockout files
+- Spectrum bar coloration (min/threshold/max)
+- Active channel tracking and coloration
+- GUI adjustments in channel and receiver windows, borders and labels
+- priority, lockout, and text log file name displays
+- pulled logger framework from kibihrchak and revised to python3
+- log file framework with enable flags (to prepare for multiple loggers implemented, text and database)
+- log file timeout so active channels are indicated only every TIMEOUT seconds
+ 
+john:
+- long running file end (pending pull into lordmorgul repo)
+
+kibihrchak:
+- Logger branch text file log entries
+
+ta6o:
+- Initial python3 fixes for syntax
 
 m0mik:
 - Added HackRF IF/BB gain parameters
@@ -36,25 +62,6 @@ madengr:
 - AM demodulation
 - Priority channels
 
-ta6o:
-- Initial python3 fixes for syntax
-
-kibihrchak:
-- Logger branch text file log entries
-
-john:
-- long running file end (pending pull into lordmorgul repo)
-
-lordmorgul:
-- Min and max spectrum switches
-- Python3 builtin functions correction for priority and lockout parsing
-- Example priority and lockout files
-- Spectrum bar coloration (min/threshold/max)
-- Active channel tracking and coloration
-- GUI adjustments in channel and receiver windows, borders and labels
-- priority, lockout, and text log file name displays
-- log file framework with enable flags (to prepare for multiple loggers implemented, text and database)
- 
 
 ## Console Operation:
 
