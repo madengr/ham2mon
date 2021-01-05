@@ -58,7 +58,12 @@ class Scanner(object):
         hw_args (string): Argument string to pass to harwdare
         freq_correction (int): Frequency correction in ppm
         record (bool): Record audio to file if True
+        lockout_file_name (string): Name of file with channels to lockout
+        priority_file_name (string): Name of file with channels for priority
+        channel_log_file_name (string): Name of file with channel log entries
+        channel_log_timeout (int): Timeout delay between active channel entries in log
         audio_bps (int): Audio bit depth in bps (bits/samples)
+        max_demod_length (int): Maximum demod time in seconds (0=disable)
 
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
@@ -79,6 +84,7 @@ class Scanner(object):
         channel_log_file_name (string): Name of file with channel log entries
         channel_log_timeout (int): Timeout delay between active channel entries in log
         log_timeout_last (int): Last timestamp when recently active channels were logged and cleared
+        max_demod_length (int): Maximum demod time in seconds (0=disable)
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
@@ -88,12 +94,13 @@ class Scanner(object):
                  lockout_file_name="", priority_file_name="",
                  channel_log_file_name="", channel_log_timeout=15,
                  play=True,
-                 audio_bps=8):
+                 audio_bps=8, max_demod_length=0):
 
         # Default values
-        self.gain_db = 0
-        self.if_gain_db = 16
-        self.bb_gain_db = 16
+#        self.gains
+#        self.gain_db = 0
+#        self.if_gain_db = 16
+#        self.bb_gain_db = 16
         self.squelch_db = -60
         self.volume_db = 0
         self.threshold_db = 10
@@ -114,6 +121,7 @@ class Scanner(object):
         self.log_recent_channels = []
         self.log_timeout_last = int(time.time())
         self.log_mode = ""
+        self.max_demod_length = max_demod_length
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
@@ -169,7 +177,8 @@ class Scanner(object):
                             now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
                             state_str[state],
                             freq,
-                            self.gain_db,
+                            0,
+                            #self.gain_db,
                             self.threshold_db,
                             self.channel_log_timeout))
             elif self.log_mode == "db":
@@ -191,7 +200,8 @@ class Scanner(object):
                             now.strftime("%Y-%m-%d, %H:%M:%S.%f"),
                             state_str[state],
                             freq,
-                            self.gain_db,
+                            0,
+                            #self.gain_db,
                             self.threshold_db,
                             idx))
             elif self.log_mode == "db":
@@ -290,10 +300,23 @@ class Scanner(object):
                         # Assigning channel to empty demodulator
                         demodulator.set_center_freq(channel, self.center_freq)
                         break
+
                     else:
                         pass
             else:
                 pass
+
+        # Stop any long running demodulators
+        if self.max_demod_length > 0:
+            for demodulator in self.receiver.demodulators:
+                if (demodulator.time_stamp > 0) and \
+                      (int(time.time()) - demodulator.time_stamp > \
+                      self.max_demod_length):
+                    temp_freq = demodulator.center_freq
+                    # clear the demodulator to reset file
+                    demodulator.set_center_freq(0, self.center_freq)
+                    # reset the demodulator to its frequency to restart file
+                    demodulator.set_center_freq(0, temp_freq) 
 
         # Create an tuned channel list of strings for the GUI
         # If channel is a zero then use an empty string
@@ -441,32 +464,14 @@ class Scanner(object):
         # Clear the lockout since frequency is changing
         self.clear_lockout()
 
-    def set_gain(self, gain_db):
-        """Sets gain of RF hardware
+    def filter_and_set_gains(self, all_gains):
+        """Set the supported gains and return them
 
         Args:
-            gain_db (float): Hardware RF gain in dB
+            all_gains (list of dictionary): Supported gains in dB
         """
-        self.receiver.set_gain(gain_db)
-        self.gain_db = self.receiver.gain_db
-
-    def set_if_gain(self, if_gain_db):
-        """Sets IF gain of RF hardware
-
-        Args:
-            if_gain_db (float): Hardware IF gain in dB
-        """
-        self.receiver.set_if_gain(if_gain_db)
-        self.if_gain_db = self.receiver.if_gain_db
-
-    def set_bb_gain(self, bb_gain_db):
-        """Sets BB gain of RF hardware
-
-        Args:
-            bb_gain_db (float): Hardware BB gain in dB
-        """
-        self.receiver.set_bb_gain(bb_gain_db)
-        self.bb_gain_db = self.receiver.bb_gain_db
+        self.gains = self.receiver.filter_and_set_gains(all_gains)
+        return self.gains
 
     def set_squelch(self, squelch_db):
         """Sets squelch of all demodulators
@@ -536,13 +541,15 @@ def main():
 
     # Set frequency, gain, squelch, and volume
     scanner.set_center_freq(parser.center_freq)
-    scanner.set_gain(parser.gain_db)
-    scanner.set_if_gain(parser.if_gain_db)
-    scanner.set_bb_gain(parser.bb_gain_db)
     print("\n")
     print("Started %s at %.3f Msps" % (hw_args, scanner.samp_rate/1E6))
-    print("RX at %.3f MHz with %d dB gain" % (scanner.center_freq/1E6,
-                                              scanner.gain_db))
+    print("RX at %.3f MHz with %d dB gain" % (scanner.center_freq/1E6))
+    scanner.filter_and_set_gains(parser.gains)
+    for gain in scanner.gains:
+        print("gain %s at %d dB" % (gain["name"], gain["value"]))
+    #scanner.set_gain(parser.gain_db)
+    #scanner.set_if_gain(parser.if_gain_db)
+    #scanner.set_bb_gain(parser.bb_gain_db)
     scanner.set_squelch(parser.squelch_db)
     scanner.set_volume(parser.volume_db)
     print("%d demods of type %d at %d dB squelch and %d dB volume" % \

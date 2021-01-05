@@ -348,9 +348,7 @@ class RxWindow(object):
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
         samp_rate (float): Hardware sample rate in sps (1E6 min)
-        gain_db (int): Hardware RF gain in dB
-        if_gain_db (int): Hardware IF gain in dB
-        bb_gain_db (int): Hardware BB gain in dB
+        gains (list): Hardware gains in dB
         squelch_db (int): Squelch in dB
         volume_dB (int): Volume in dB
         record (bool): Record audio to file if True
@@ -368,9 +366,6 @@ class RxWindow(object):
         self.max_freq = 148E6
         self.samp_rate = 2E6
         self.freq_entry = 'None'
-        self.gain_db = 0
-        self.if_gain_db = 16
-        self.bb_gain_db = 16
         self.squelch_db = -60
         self.volume_db = 0
         self.type_demod = 0
@@ -410,32 +405,31 @@ class RxWindow(object):
         self.win.addnstr(2, 1, text, 18, curses.color_pair(6))
         text = "Max Freq (MHz) : "
         self.win.addnstr(3, 1, text, 18, curses.color_pair(6))
-        text = "RF Gain (dB)   : "
-        self.win.addnstr(4, 1, text, 18, curses.color_pair(6))
-        text = "IF Gain (dB)   : "
-        self.win.addnstr(5, 1, text, 18, curses.color_pair(6))
-        text = "BB Gain (dB)   : "
-        self.win.addnstr(6, 1, text, 18, curses.color_pair(6))
+
+        for index, gain in enumerate(self.gains, 2):
+            text = "{} Gain (dB){} : ".format(gain["name"], (4-len(gain["name"]))*' ')
+            self.win.addnstr(index+2, 1, text, 15)
+
         text = "BB Rate (Msps) : "
-        self.win.addnstr(7, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+3, 1, text, 18, curses.color_pair(6))
         text = "BB Sql  (dB)   : "
-        self.win.addnstr(8, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+4, 1, text, 18, curses.color_pair(6))
         text = "AF Vol  (dB)   : "
-        self.win.addnstr(9, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+5, 1, text, 18, curses.color_pair(6))
         text = "Record         : "
-        self.win.addnstr(10, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+6, 1, text, 18, curses.color_pair(6))
         text = "Demod Type     : "
-        self.win.addnstr(11, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+7, 1, text, 18, curses.color_pair(6))
         text = "Lockout File   : "
-        self.win.addnstr(12, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+8, 1, text, 18, curses.color_pair(6))
         text = "Priority File  : "
-        self.win.addnstr(13, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+9, 1, text, 18, curses.color_pair(6))
         text = "Log File       : "
-        self.win.addnstr(14, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+10, 1, text, 18, curses.color_pair(6))
         text = "Log Timeout (s): "
-        self.win.addnstr(15, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index+11, 1, text, 18, curses.color_pair(6))
 #        text = "Log Mode       : "
-#        self.win.addnstr(16, 1, text, 18, curses.color_pair(6))
+#        self.win.addnstr(index+12, 1, text, 18, curses.color_pair(6))
 
         # Draw the receiver info suffix fields
         if self.freq_entry != 'None':
@@ -447,32 +441,31 @@ class RxWindow(object):
         self.win.addnstr(2, 20, text, 8, curses.color_pair(6))
         text = '{:.3f}'.format((self.max_freq)/1E6)
         self.win.addnstr(3, 20, text, 8, curses.color_pair(6))
-        text = str(self.gain_db)
-        self.win.addnstr(4, 20, text, 8, curses.color_pair(5))
-        text = str(self.if_gain_db)
-        self.win.addnstr(5, 20, text, 8, curses.color_pair(5))
-        text = str(self.bb_gain_db)
-        self.win.addnstr(6, 20, text, 8, curses.color_pair(5))
+
+        for index, gain in enumerate(self.gains, 2):
+            text = str(gain["value"])
+            self.win.addnstr(index+2, 20, text, 8, curses.color_pair(5))
+
         text = str(self.samp_rate/1E6)
-        self.win.addnstr(7, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index+3, 20, text, 8, curses.color_pair(6))
         text = str(self.squelch_db)
-        self.win.addnstr(8, 20, text, 8, curses.color_pair(5))
+        self.win.addnstr(index+4, 20, text, 8, curses.color_pair(5))
         text = str(self.volume_db)
-        self.win.addnstr(9, 20, text, 8, curses.color_pair(5))
+        self.win.addnstr(index+5, 20, text, 8, curses.color_pair(5))
         text = str(self.record)
-        self.win.addnstr(10, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index+6, 20, text, 8, curses.color_pair(6))
         text = str(self.type_demod)
-        self.win.addnstr(11, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index+7, 20, text, 8, curses.color_pair(6))
         text = str(self.lockout_file_name)
-        self.win.addnstr(12, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index+8, 20, text, 20, curses.color_pair(6))
         text = str(self.priority_file_name)
-        self.win.addnstr(13, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index+9, 20, text, 20, curses.color_pair(6))
         text = str(self.channel_log_file_name)
-        self.win.addnstr(14, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index+10, 20, text, 20, curses.color_pair(6))
         text = str(self.channel_log_timeout)
-        self.win.addnstr(15, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index+11, 20, text, 20, curses.color_pair(6))
 #        text = str(self.log_mode)
-#        self.win.addnstr(16, 20, text, 20, curses.color_pair(6))
+#        self.win.addnstr(index+12, 20, text, 20, curses.color_pair(6))
 
         # Hide cursor
         self.win.leaveok(1)
@@ -567,52 +560,52 @@ class RxWindow(object):
         # pylint: disable=too-many-return-statements
         # pylint: disable=too-many-branches
 
-        # Tune self.gain_db in 10 dB steps with 'g' and 'f'
+        # Tune 1st gain element in 10 dB steps with 'g' and 'f'
         if keyb == ord('g'):
-            self.gain_db += 10
+            self.gains[0]["value"] += 10
             return True
         elif keyb == ord('f'):
-            self.gain_db -= 10
+            self.gains[0]["value"] -= 10
             return True
 
-        # Tune self.gain_db in 1 dB steps with 'G' and 'F'
+        # Tune 1st gain element in 1 dB steps with 'G' and 'F'
         if keyb == ord('G'):
-            self.gain_db += 1
+            self.gains[0]["value"] += 1
             return True
         elif keyb == ord('F'):
-            self.gain_db -= 1
+            self.gains[0]["value"] -= 1
             return True
 
-        # Tune self.if_gain_db in 10 dB steps with 'u' and 'y'
+        # Tune 2nd gain element in 10 dB steps with 'u' and 'y'
         if keyb == ord('u'):
-            self.if_gain_db += 10
+            self.gains[1]["value"] += 10
             return True
         elif keyb == ord('y'):
-            self.if_gain_db -= 10
+            self.gains[1]["value"] -= 10
             return True
 
-        # Tune self.if_gain_db in 1 dB steps with 'U' and 'Y'
+        # Tune 2nd gain element in 1 dB steps with 'U' and 'Y'
         if keyb == ord('U'):
-            self.if_gain_db += 1
+            self.gains[1]["value"] += 1
             return True
         elif keyb == ord('Y'):
-            self.if_gain_db -= 1
+            self.gains[1]["value"] -= 1
             return True
 
-        # Tune self.bb_gain_db in 10 dB steps with ']' and '['
+        # Tune 3rd gain element in 10 dB steps with ']' and '['
         if keyb == ord(']'):
-            self.bb_gain_db += 10
+            self.gains[2]["value"] += 10
             return True
         elif keyb == ord('['):
-            self.bb_gain_db -= 10
+            self.gains[2]["value"] -= 10
             return True
 
-        # Tune self.bb_gain_db in 1 dB steps with '}' and '{'
+        # Tune 3rd gain element in 1 dB steps with '}' and '{'
         if keyb == ord('}'):
-            self.bb_gain_db += 1
+            self.gains[2]["value"] += 1
             return True
         elif keyb == ord('{'):
-            self.bb_gain_db -= 1
+            self.gains[2]["value"] -= 1
             return True
 
         # Tune self.squelch_db in 1 dB steps with 's' and 'a'

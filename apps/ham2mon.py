@@ -57,28 +57,26 @@ def main(screen):
     channel_log_timeout = PARSER.channel_log_timeout
     freq_correction = PARSER.freq_correction
     audio_bps = PARSER.audio_bps
+    max_demod_length = PARSER.max_demod_length
     scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                            freq_correction, record, lockout_file_name,
                            priority_file_name, channel_log_file_name, channel_log_timeout,
-                           play, audio_bps)
+                           play, audio_bps, max_demod_length)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)
-    scanner.set_gain(PARSER.gain_db)
-    scanner.set_if_gain(PARSER.if_gain_db)
-    scanner.set_bb_gain(PARSER.bb_gain_db)
+    
     scanner.set_squelch(PARSER.squelch_db)
     scanner.set_volume(PARSER.volume_db)
     scanner.set_threshold(PARSER.threshold_db)
+
+    rxwin.gains = scanner.filter_and_set_gains(PARSER.gains)
 
     # Get the initial settings for GUI
     rxwin.center_freq = scanner.center_freq
     rxwin.min_freq = scanner.min_freq
     rxwin.max_freq = scanner.max_freq
     rxwin.samp_rate = scanner.samp_rate
-    rxwin.gain_db = scanner.gain_db
-    rxwin.if_gain_db = scanner.if_gain_db
-    rxwin.bb_gain_db = scanner.bb_gain_db
     rxwin.squelch_db = scanner.squelch_db
     rxwin.volume_db = scanner.volume_db
     rxwin.record = scanner.record
@@ -127,15 +125,8 @@ def main(screen):
             rxwin.max_freq = scanner.max_freq
 
         if rxwin.proc_keyb_soft(keyb):
-            # Set and update RF gain
-            scanner.set_gain(rxwin.gain_db)
-            rxwin.gain_db = scanner.gain_db
-            # Set and update IF gain
-            scanner.set_if_gain(rxwin.if_gain_db)
-            rxwin.if_gain_db = scanner.if_gain_db
-            # Set and update BB gain
-            scanner.set_bb_gain(rxwin.bb_gain_db)
-            rxwin.bb_gain_db = scanner.bb_gain_db
+            # Set all the gains
+            rxwin.gains = scanner.filter_and_set_gains(rxwin.gains)
             # Set and update squelch
             scanner.set_squelch(rxwin.squelch_db)
             rxwin.squelch_db = scanner.squelch_db

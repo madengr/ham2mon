@@ -60,14 +60,20 @@ class CLParser(object):
                           default=4E6,
                           help="Hardware ask sample rate in sps (1E6 minimum)")
 
-        parser.add_option("-g", "--gain", type="eng_float", dest="gain_db",
+        parser.add_option("-g", "--gain", type="eng_float", dest="rf_gain_db",
                           default=0, help="Hardware RF gain in dB")
 
         parser.add_option("-i", "--if_gain", type="eng_float", dest="if_gain_db",
-                          default=16, help="Hardware IF gain in dB")
+                          default=16, help="Hardware IF gain in dB or index (driver dependent)")
 
         parser.add_option("-o", "--bb_gain", type="eng_float", dest="bb_gain_db",
                           default=16, help="Hardware BB gain in dB")
+
+        parser.add_option("-j", "--lna_gain", type="eng_float", dest="lna_gain_db",
+                          default=8, help="Hardware LNA gain index")
+
+        parser.add_option("-x", "--mix_gain", type="eng_float", dest="mix_gain_db",
+                          default=5, help="Hardware MIX gain index")
 
         parser.add_option("-s", "--squelch", type="eng_float",
                           dest="squelch_db", default=-60,
@@ -124,7 +130,10 @@ class CLParser(object):
         parser.add_option("-N", "--min_db", type="float", dest="min_db",
                           default=-10,
                           help="Spectrum window min dB for display (no greater than -10dB from max")
-
+        
+        parser.add_option("-k", "--max-demod-length", type="int", dest="max_demod_length",
+                          default=0,
+                          help="Maxumum length for a demodulation (sec)")
 
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
@@ -134,9 +143,15 @@ class CLParser(object):
         self.type_demod = int(options.type_demod)
         self.center_freq = float(options.center_freq)
         self.ask_samp_rate = float(options.ask_samp_rate)
-        self.gain_db = float(options.gain_db)
-        self.if_gain_db = float(options.if_gain_db)
-        self.bb_gain_db = float(options.bb_gain_db)
+
+        self.gains = [
+            { "name": "RF", "value": float(options.rf_gain_db),  "query": "yes" },
+            { "name": "LNA","value": float(options.lna_gain_db), "query": "no" },
+            { "name": "MIX","value": float(options.mix_gain_db), "query": "no" },
+            { "name": "IF", "value": float(options.if_gain_db),  "query": "no" },
+            { "name": "BB", "value": float(options.bb_gain_db),  "query": "no" }
+        ]
+
         self.squelch_db = float(options.squelch_db)
         self.volume_db = float(options.volume_db)
         self.threshold_db = float(options.threshold_db)
@@ -150,6 +165,7 @@ class CLParser(object):
         self.audio_bps = int(options.audio_bps)
         self.max_db = float(options.max_db)
         self.min_db = float(options.min_db)
+        self.max_demod_length = int(options.max_demod_length)
 
 
 def main():
@@ -166,9 +182,8 @@ def main():
     print("type_demod:          " + str(parser.type_demod))
     print("center_freq:         " + str(parser.center_freq))
     print("ask_samp_rate:       " + str(parser.ask_samp_rate))
-    print("gain_db:             " + str(parser.gain_db))
-    print("if_gain_db:          " + str(parser.if_gain_db))
-    print("bb_gain_db:          " + str(parser.bb_gain_db))
+    for gain in parser.gains:
+        print("gain %s at %d dB" % (gain["name"], gain["value"]))
     print("squelch_db:          " + str(parser.squelch_db))
     print("volume_db:           " + str(parser.volume_db))
     print("threshold_db:        " + str(parser.threshold_db))
