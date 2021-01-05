@@ -48,12 +48,12 @@ class BaseTuner(gr.hier_block2):
         self.center_freq = center_freq
 
         # Set the file name
+        timestamp = int(time.time())
         if self.center_freq == 0 or not self.record:
             # If tuner at zero Hz, or record false, then file name to /dev/null
             file_name = "/dev/null"
         else:
             # Otherwise use frequency and time stamp for file name
-            timestamp = int(time.time())
             strtimestamp = "_" + str(timestamp)
             file_freq = (rf_center_freq + self.center_freq)/1E6
             file_freq = np.round(file_freq, 3)
