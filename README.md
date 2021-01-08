@@ -11,7 +11,16 @@ Additional screenshots show updated screen color and channel highlighting with
 ![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_active.png)
 ![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_overmax.png)
 
+
 ## Tested with:
+Recent development and tests:
+- RTL-SDR v3 RTL2832 + R820T at 2 Msps (http://rtl-sdr.com)
+- NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
+- GNU Radio 3.8.2.0 (https://github.com/gnuradio/gnuradio)
+- GrOsmoSDR 0.1.4-29 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
+- Python 3.8.6
+
+Previous version tests:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.7.10 (https://github.com/gnuradio/gnuradio)
@@ -30,9 +39,13 @@ lordmorgul:
 - pulled logger framework from kibihrchak and revised to python3
 - log file framework with enable flags (to prepare for multiple loggers implemented, text and database)
 - log file timeout so active channels are indicated only every TIMEOUT seconds
+- pulled long run demodulator fix to python3 version from john
+- pulled gain corrections to python3 version from john
+- defined max file size to save from command line option
+- channel width configurable from command line option
  
 john:
-- long running file end (pending pull into lordmorgul repo)
+- long running file end (demodulator run time limit)
 
 kibihrchak:
 - Logger branch text file log entries
@@ -65,6 +78,8 @@ madengr:
 
 ## Console Operation:
 
+Options are displayed using ./parser.py -h
+
 The following is an example of the option switches for UHD with NBFM demodulation, although omission of any will use default values (shown below) that are optimal for the B200:
 
 ./ham2mon.py -a "uhd" -n 8 -d 0 -f 146E6 -r 4E6 -g 30 -s -60 -v 0 -t 10 -w
@@ -90,6 +105,8 @@ Example of reading from an IQ file:
 For console operation, it is possible to specify the log file name, in which channel detection, and removal will be logged. The option is `--log_file=<file-name>`.
 
 Whenever a channel appears/dissapears, new line will be written in the log file. For the line format, check `__print_channel_log__()` in `scanner.Scanner`.
+
+Active channels are flagged as active periodically based on the active channel logging timeout.
 
 ## GUI Controls:
 
@@ -193,6 +210,12 @@ Whenever a channel appears/dissapears, new line will be written in the log file.
 
 `  -N MIN_DB, --min_db=MIN_DB`
 `                        Spectrum window minimum in dB`
+`  -k MAX_DEMOD_LENGTH, --max-demod-length=MAX_DEMOD_LENGTH`
+`                        Maxumum length for a demodulation (sec)`
+`  -B CHANNEL_SPACING, --channel-spacing=CHANNEL_SPACING`
+`                        Channel spacing (spectrum bin size)`
+`  -F MIN_FILE_SIZE, --min-file-size=MIN_FILE_SIZE`
+`                        Minimum size file to save in bytes, default 0 (save all)`
 
 
 ## Description:

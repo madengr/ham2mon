@@ -142,8 +142,8 @@ class CLParser(object):
                           help="Channel spacing (spectrum bin size)")
 
         parser.add_option("-F", "--min-file-size", type="int", dest="min_file_size",
-                          default=5000,
-                          help="Minimum size file to save when ")
+                          default=0,
+                          help="Minimum size file to save in bytes, default 0 (save all)")
 
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
