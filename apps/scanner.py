@@ -94,7 +94,8 @@ class Scanner(object):
                  lockout_file_name="", priority_file_name="",
                  channel_log_file_name="", channel_log_timeout=15,
                  play=True,
-                 audio_bps=8, max_demod_length=0):
+                 audio_bps=8, max_demod_length=0, channel_spacing=5000,
+                 min_file_size=0):
 
         # Default values
 #        self.gains
@@ -113,7 +114,7 @@ class Scanner(object):
         self.gui_tuned_channels = []
         self.gui_active_channels = []
         self.gui_lockout_channels = []
-        self.channel_spacing = 5000
+        self.channel_spacing = channel_spacing
         self.lockout_file_name = lockout_file_name
         self.priority_file_name = priority_file_name
         self.channel_log_file_name = channel_log_file_name
@@ -122,11 +123,13 @@ class Scanner(object):
         self.log_timeout_last = int(time.time())
         self.log_mode = ""
         self.max_demod_length = max_demod_length
+        self.min_file_size = min_file_size
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
                                        hw_args, freq_correction, record, play,
-                                       audio_bps)
+                                       audio_bps,
+                                       min_file_size)
 
         # Open channel log file for appending data, if it is specified
         if channel_log_file_name != "":
@@ -534,10 +537,14 @@ def main():
     priority_file_name = parser.priority_file_name
     channel_log_file_name = parser.channel_log_file_name
     audio_bps = parser.audio_bps
+    max_demo_length = parser.max_demod_length
+    channel_spacing = parser.channel_spacing
+    min_file_size = parser.min_file_size
     scanner = Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                       freq_correction, record, lockout_file_name,
                       priority_file_name, channel_log_file_name,
-                      audio_bps)
+                      audio_bps, max_demod_length, channel_spacing,
+                      min_file_size)
 
     # Set frequency, gain, squelch, and volume
     scanner.set_center_freq(parser.center_freq)

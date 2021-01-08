@@ -31,6 +31,8 @@ class CLParser(object):
         audio_bps (int): Audio bit depth in bps
         max_db (float): Spectrum max dB for display
         min_db (float): Spectrum min dB for display
+        channel_spacing (int): Channel spacing (spectrum bin size) for identification of channels
+        min_file_size (int): Minimum file size to save
     """
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -135,6 +137,14 @@ class CLParser(object):
                           default=0,
                           help="Maxumum length for a demodulation (sec)")
 
+        parser.add_option("-B", "--channel-spacing", type="int", dest="channel_spacing",
+                          default=5000,
+                          help="Channel spacing (spectrum bin size)")
+
+        parser.add_option("-F", "--min-file-size", type="int", dest="min_file_size",
+                          default=5000,
+                          help="Minimum size file to save when ")
+
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
 
@@ -166,6 +176,8 @@ class CLParser(object):
         self.max_db = float(options.max_db)
         self.min_db = float(options.min_db)
         self.max_demod_length = int(options.max_demod_length)
+        self.channel_spacing = int(options.channel_spacing)
+        self.min_file_size = int(options.min_file_size)
 
 
 def main():
@@ -196,6 +208,8 @@ def main():
     print("audio_bps:           " + str(parser.audio_bps))
     print("max_db:              " + str(parser.max_db))
     print("min_db:              " + str(parser.min_db))
+    print("max_demod_length:    " + str(parser.max_demod_length))
+    print("channel_spacing:     " + str(parser.channel_spacing))
 
 
 if __name__ == '__main__':

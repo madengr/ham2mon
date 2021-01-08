@@ -58,10 +58,12 @@ def main(screen):
     freq_correction = PARSER.freq_correction
     audio_bps = PARSER.audio_bps
     max_demod_length = PARSER.max_demod_length
+    channel_spacing = PARSER.channel_spacing
+    min_file_size = PARSER.min_file_size
     scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                            freq_correction, record, lockout_file_name,
                            priority_file_name, channel_log_file_name, channel_log_timeout,
-                           play, audio_bps, max_demod_length)
+                           play, audio_bps, max_demod_length, channel_spacing, min_file_size)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)

@@ -75,9 +75,9 @@ class BaseTuner(gr.hier_block2):
                 self.file_name == '/dev/null'):
             return
 
-        # If we never wrote any data to the wavfile sink, delete
-        # the (empty) wavfile
-        if os.stat(self.file_name).st_size in (44, 0):   # ugly hack
+        # If we never wrote any data to the wavfile sink, or its smaller than
+        # the minimum defined size, then delete the (empty) wavfile
+        if os.stat(self.file_name).st_size < (self.min_file_size):
             os.unlink(self.file_name)  # delete the file
 
     def set_squelch(self, squelch_db):
@@ -127,15 +127,17 @@ class TunerDemodNBFM(BaseTuner):
         audio_rate (float): Output audio sample rate in sps (8 kHz minimum)
         record (bool): Record audio to file if True
         audio_bps (int): Audio bit depth in bps (bits/samples)
+        min_file_size (int): Minimum saved wav file size
 
     Attributes:
         center_freq (float): Baseband center frequency in Hz
         record (bool): Record audio to file if True
+        time_stamp (int): Time stamp of demodulator start for timing run length
     """
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, samp_rate=4E6, audio_rate=8000, record=True,
-                 audio_bps=8):
+                 audio_bps=8, min_file_size=0):
         gr.hier_block2.__init__(self, "TunerDemodNBFM",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(1, 1, gr.sizeof_float))
@@ -147,6 +149,7 @@ class TunerDemodNBFM(BaseTuner):
         self.quad_demod_gain = 0.050
         self.file_name = "/dev/null"
         self.record = record
+        self.min_file_size = min_file_size
 
         # Decimation values for four stages of decimation
         decims = (5, int(samp_rate/1E6))
@@ -264,10 +267,12 @@ class TunerDemodAM(BaseTuner):
         audio_rate (float): Output audio sample rate in sps (8 kHz minimum)
         record (bool): Record audio to file if True
         audio_bps (int): Audio bit depth in bps (bits/samples)
+        min_file_size (int): Minimum saved wav file size
 
     Attributes:
         center_freq (float): Baseband center frequency in Hz
         record (bool): Record audio to file if True
+        time_stamp (int): Time stamp of demodulator start for timing run length
     """
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-locals
@@ -285,6 +290,8 @@ class TunerDemodAM(BaseTuner):
         self.agc_ref = 0.1
         self.file_name = "/dev/null"
         self.record = record
+        self.min_file_size = min_file_size
+
 
         # Decimation values for four stages of decimation
         decims = (5, int(samp_rate/1E6))
@@ -403,7 +410,7 @@ class Receiver(gr.top_block):
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
                  hw_args="uhd", freq_correction=0, record=True, play=True,
-                 audio_bps=8):
+                 audio_bps=8, min_file_size=0):
 
         # Call the initialization method from the parent class
         gr.top_block.__init__(self, "Receiver")
@@ -414,6 +421,7 @@ class Receiver(gr.top_block):
         self.squelch_db = -60
         self.volume_db = 0
         audio_rate = 8000
+        self.min_file_size = min_file_size
 
         # Setup the USRP source, or use the USRP sim
         self.src = osmosdr.source(args="numchan=" + str(1) + " " + hw_args)
@@ -476,11 +484,11 @@ class Receiver(gr.top_block):
             if type_demod == 1:
                 self.demodulators.append(TunerDemodAM(self.samp_rate,
                                                       audio_rate, record,
-                                                      audio_bps))
+                                                      audio_bps, self.min_file_size))
             else:
                 self.demodulators.append(TunerDemodNBFM(self.samp_rate,
                                                         audio_rate, record,
-                                                        audio_bps))
+                                                        audio_bps, self.min_file_size))
 
         if play:
             # Create an adder
@@ -591,8 +599,9 @@ def main():
     record = False
     play = True
     audio_bps = 8
+    min_file_size = 0
     receiver = Receiver(ask_samp_rate, num_demod, type_demod, hw_args,
-                        freq_correction, record, play, audio_bps)
+                        freq_correction, record, play, audio_bps, min_file_size)
 
     # Start the receiver and wait for samples to accumulate
     receiver.start()
