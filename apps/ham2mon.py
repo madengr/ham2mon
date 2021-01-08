@@ -144,6 +144,10 @@ def main(screen):
         if lockoutwin.proc_keyb_clear_lockout(keyb):
             scanner.clear_lockout()
 
+    # cleanup terminating all demodulators
+    for demod in scanner.receiver.demodulators:
+        demod.set_center_freq(0, 0);
+
 if __name__ == '__main__':
     try:
         # Do this since curses wrapper won't let parser write to screen
