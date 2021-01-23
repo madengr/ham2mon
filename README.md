@@ -143,6 +143,8 @@ Active channels are flagged as active periodically based on the active channel l
 
 `CTRL-C = quit`
 
+`SHIFT-R = quit`
+
 ## Help Menu
 
 `Usage: ham2mon.py [options]`
@@ -172,8 +174,14 @@ Active channels are flagged as active periodically based on the active channel l
 `  -i IF_GAIN_DB, --if_gain=IF_GAIN_DB`
 `                        Hardware IF gain in dB`
 
+`  -j IF_GAIN_DB, --lna_gain=LNA_GAIN_DB`
+`                        Hardware LNA gain in dB`
+
 `  -o BB_GAIN_DB, --bb_gain=BB_GAIN_DB`
 `                        Hardware BB gain in dB`
+
+`  -x MIX_GAIN_DB, --mix_gain=MIX_GAIN_DB`
+`                        Hardware MIX gain in dB`
 
 `  -s SQUELCH_DB, --squelch=SQUELCH_DB`
 `                        Squelch in dB`
