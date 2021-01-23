@@ -68,7 +68,7 @@ class Scanner(object):
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
         samp_rate (float): Hardware sample rate in sps (1E6 min)
-        gain_db (int): Hardware RF gain in dB
+        gains : Enumerated gain types and values
         squelch_db (int): Squelch in dB
         volume_dB (int): Volume in dB
         threshold_dB (int): Threshold for channel detection in dB
@@ -98,10 +98,6 @@ class Scanner(object):
                  min_file_size=0):
 
         # Default values
-#        self.gains
-#        self.gain_db = 0
-#        self.if_gain_db = 16
-#        self.bb_gain_db = 16
         self.squelch_db = -60
         self.volume_db = 0
         self.threshold_db = 10
@@ -150,12 +146,6 @@ class Scanner(object):
         self.min_freq = (self.center_freq - self.samp_rate/2)
         self.max_freq = (self.center_freq + self.samp_rate/2)
 
-        # Start the receiver and wait for samples to accumulate
-        self.receiver.start()
-        time.sleep(1)
-
-        if self.channel_log_file != None :
-           self.channel_log_file.flush()
 
 #        # removed this since its essentially the same as above and this required spectrum first
 #        self.spectrum = self.receiver.probe_signal_vf.level()
@@ -165,6 +155,12 @@ class Scanner(object):
 #        self.max_freq = ((len(self.spectrum) - len(self.spectrum)/2) * (self.samp_rate / len(self.spectrum) \
 #                + self.center_freq))
 
+        # Start the receiver and wait for samples to accumulate
+        self.receiver.start()
+        time.sleep(1)
+
+        if self.channel_log_file != None :
+           self.channel_log_file.flush()
 
     def __del__(self):
         if self.channel_log_file != None :
@@ -554,9 +550,6 @@ def main():
     scanner.filter_and_set_gains(parser.gains)
     for gain in scanner.gains:
         print("gain %s at %d dB" % (gain["name"], gain["value"]))
-    #scanner.set_gain(parser.gain_db)
-    #scanner.set_if_gain(parser.if_gain_db)
-    #scanner.set_bb_gain(parser.bb_gain_db)
     scanner.set_squelch(parser.squelch_db)
     scanner.set_volume(parser.volume_db)
     print("%d demods of type %d at %d dB squelch and %d dB volume" % \

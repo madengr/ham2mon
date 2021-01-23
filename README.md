@@ -13,7 +13,7 @@ Additional screenshots show updated screen color and channel highlighting with
 
 
 ## Tested with:
-Recent development and tests:
+Recent development and tests on Python3:
 - RTL-SDR v3 RTL2832 + R820T at 2 Msps (http://rtl-sdr.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.8.2.0 (https://github.com/gnuradio/gnuradio)
@@ -44,8 +44,9 @@ lordmorgul:
 - defined max file size to save from command line option
 - channel width configurable from command line option
  
-john:
+john-:
 - long running file end (demodulator run time limit)
+- gain config corrections, available gains detected from gnuradio and other inputs ignored / not shown
 
 kibihrchak:
 - Logger branch text file log entries

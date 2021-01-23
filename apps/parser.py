@@ -17,7 +17,7 @@ class CLParser(object):
         num_demod (int): Number of parallel demodulators
         center_freq (float): Hardware RF center frequency in Hz
         ask_samp_rate (float): Asking sample rate of hardware in sps (1E6 min)
-        gain_db (int): Hardware RF gain in dB
+        gains : Enumerated gain types and values
         squelch_db (int): Squelch in dB
         volume_dB (int): Volume in dB
         threshold_dB (int): Threshold for channel detection in dB
@@ -31,6 +31,7 @@ class CLParser(object):
         audio_bps (int): Audio bit depth in bps
         max_db (float): Spectrum max dB for display
         min_db (float): Spectrum min dB for display
+        max_demod_length (int): Timeout for long running demodulators to reset new file timestamp in seconds
         channel_spacing (int): Channel spacing (spectrum bin size) for identification of channels
         min_file_size (int): Minimum file size to save
     """
@@ -210,6 +211,7 @@ def main():
     print("min_db:              " + str(parser.min_db))
     print("max_demod_length:    " + str(parser.max_demod_length))
     print("channel_spacing:     " + str(parser.channel_spacing))
+    print("min_file_size:       " + str(parser.min_file_size))
 
 
 if __name__ == '__main__':

@@ -87,6 +87,10 @@ def main(screen):
     rxwin.priority_file_name = scanner.priority_file_name
     rxwin.channel_log_file_name = scanner.channel_log_file_name
     rxwin.channel_log_timeout = scanner.channel_log_timeout
+    if (rxwin.channel_log_file_name != ""):
+        rxwin.log_mode = "file"
+    else:
+        rxwin.log_mode = "none"
 
     specwin.max_db = PARSER.max_db
     specwin.min_db = PARSER.min_db

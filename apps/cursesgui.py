@@ -351,9 +351,13 @@ class RxWindow(object):
         gains (list): Hardware gains in dB
         squelch_db (int): Squelch in dB
         volume_dB (int): Volume in dB
+        type_demod (int): Type of demodulation (0 = FM, 1 = AM)
         record (bool): Record audio to file if True
         lockout_file_name (string): Name of file with channels to lockout
         priority_file_name (string): Name of file with channels for priority
+        channel_log_file_name (string): Name of file for channel activity logging
+        channel_log_timeout (int): Timeout delay between logging active state of channel in seconds
+        log_mode (string): Log system mode (file, database type)
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -374,6 +378,11 @@ class RxWindow(object):
         self.priority_file_name = ""
         self.channel_log_file_name = ""
         self.channel_log_timeout = 15
+        # nothing other than file logging defined
+        if (self.channel_log_file_name != ""):
+            self.log_mode = "file"
+        else:
+            self.log_mode = "none"
 
         # Create a window object in the bottom half of the screen
         # Make it about 1/3 the screen width
@@ -428,8 +437,8 @@ class RxWindow(object):
         self.win.addnstr(index+10, 1, text, 18, curses.color_pair(6))
         text = "Log Timeout (s): "
         self.win.addnstr(index+11, 1, text, 18, curses.color_pair(6))
-#        text = "Log Mode       : "
-#        self.win.addnstr(index+12, 1, text, 18, curses.color_pair(6))
+        text = "Log Mode       : "
+        self.win.addnstr(index+12, 1, text, 18, curses.color_pair(6))
 
         # Draw the receiver info suffix fields
         if self.freq_entry != 'None':
@@ -464,8 +473,8 @@ class RxWindow(object):
         self.win.addnstr(index+10, 20, text, 20, curses.color_pair(6))
         text = str(self.channel_log_timeout)
         self.win.addnstr(index+11, 20, text, 20, curses.color_pair(6))
-#        text = str(self.log_mode)
-#        self.win.addnstr(index+12, 20, text, 20, curses.color_pair(6))
+        text = str(self.log_mode)
+        self.win.addnstr(index+12, 20, text, 20, curses.color_pair(6))
 
         # Hide cursor
         self.win.leaveok(1)
