@@ -30,7 +30,7 @@ class BaseTuner(gr.hier_block2):
 
         Sets baseband center frequency of frequency translating FIR filter
         Also sets file name of wave file sink
-        If tuner is tuned to zero Hz then set to file name to /dev/null
+        If tuner is tuned to zero Hz then set to file name to None
         Otherwise set file name to tuned RF frequency in MHz
 
         Args:
@@ -38,7 +38,9 @@ class BaseTuner(gr.hier_block2):
             rf_center_freq (float): RF center in Hz (for file name)
         """
         # Since the frequency (hence file name) changed, then close it
-        self.blocks_wavfile_sink.close()
+        if (self.record and self.file_name and 
+                self.file_name != None):
+            self.blocks_wavfile_sink.close()
 
         # If we never wrote any data to the wavfile sink, delete the file
         self._delete_wavfile_if_empty()
@@ -50,8 +52,8 @@ class BaseTuner(gr.hier_block2):
         # Set the file name
         timestamp = int(time.time())
         if self.center_freq == 0 or not self.record:
-            # If tuner at zero Hz, or record false, then file name to /dev/null
-            file_name = "/dev/null"
+            # If tuner at zero Hz, or record false, then file name to None
+            file_name = None
         else:
             # Otherwise use frequency and time stamp for file name
             strtimestamp = "_" + str(timestamp)
@@ -65,14 +67,16 @@ class BaseTuner(gr.hier_block2):
             except OSError:  # will need to add something here for Win support
                 pass  # directory already exists
 
-        self.file_name = file_name
-        self.blocks_wavfile_sink.open(self.file_name)
+        if (file_name != None and self.record and self.file_name != None):
+            self.file_name = file_name
+            self.blocks_wavfile_sink.open(self.file_name)
+
         self.time_stamp = timestamp
 
     def _delete_wavfile_if_empty(self):
         """Delete the current wavfile if it's empty."""
         if (not self.record or not self.file_name or
-                self.file_name == '/dev/null'):
+                self.file_name == None):
             return
 
         # If we never wrote any data to the wavfile sink, or its smaller than
@@ -147,7 +151,7 @@ class TunerDemodNBFM(BaseTuner):
         self.time_stamp = 0
         squelch_db = -60
         self.quad_demod_gain = 0.050
-        self.file_name = "/dev/null"
+        self.file_name = None
         self.record = record
         self.min_file_size = min_file_size
 
@@ -156,8 +160,8 @@ class TunerDemodNBFM(BaseTuner):
 
         # Low pass filter taps for decimation by 5
         low_pass_filter_taps_0 = \
-            grfilter.firdes_low_pass(1, 1, 0.090, 0.010,
-                                     grfilter.firdes.WIN_HAMMING)
+            grfilter.firdes.low_pass(1, 1, 0.090, 0.010,
+                    window.WIN_HAMMING)
 
         # Frequency translating FIR filter decimating by 5
         self.freq_xlating_fir_filter_ccc = \
@@ -172,8 +176,8 @@ class TunerDemodNBFM(BaseTuner):
         # Low pass filter taps for decimation from samp_rate/25 to 40-79.9 ksps
         # In other words, decimation by int(samp_rate/1E6)
         # 12.5 kHz cutoff for NBFM channel bandwidth
-        low_pass_filter_taps_1 = grfilter.firdes_low_pass(
-            1, samp_rate/decims[0]**2, 12.5E3, 1E3, grfilter.firdes.WIN_HAMMING)
+        low_pass_filter_taps_1 = grfilter.firdes.low_pass(
+            1, samp_rate/decims[0]**2, 12.5E3, 1E3, window.WIN_HAMMING)
 
         # FIR filter decimation by int(samp_rate/1E6)
         fir_filter_ccc_1 = grfilter.fir_filter_ccc(decims[1],
@@ -189,9 +193,9 @@ class TunerDemodNBFM(BaseTuner):
             analog.quadrature_demod_cf(self.quad_demod_gain)
 
         # 3.5 kHz cutoff for audio bandwidth
-        low_pass_filter_taps_2 = grfilter.firdes_low_pass(1,\
+        low_pass_filter_taps_2 = grfilter.firdes.low_pass(1,\
                         samp_rate/(decims[1] * decims[0]**2),\
-                        3.5E3, 500, grfilter.firdes.WIN_HAMMING)
+                        3.5E3, 500, window.WIN_HAMMING)
 
         # FIR filter decimating by 5 from 40-79.9 ksps to 8-15.98 ksps
         fir_filter_fff_0 = grfilter.fir_filter_fff(decims[0],
@@ -219,12 +223,20 @@ class TunerDemodNBFM(BaseTuner):
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
         # File sink with single channel and bits/sample
-        self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, audio_bps)
+        if (self.file_name != None):
+            self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
+                                                       audio_rate, audio_bps,
+                                                       blocks.FORMAT_WAV,
+                                                       blocks.FORMAT_PCM_16,
+                                                       False)
 
         # Connect the blocks for recording
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
-        self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
+        if (self.file_name != None):
+            self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
+        else:
+            null_sink1 = blocks.null_sink(gr.sizeof_float)
+            self.connect(analog_pwr_squelch_ff, null_sink1)
 
     def set_volume(self, volume_db):
         """Sets the volume
@@ -278,7 +290,7 @@ class TunerDemodAM(BaseTuner):
     # pylint: disable=too-many-locals
 
     def __init__(self, samp_rate=4E6, audio_rate=8000, record=True,
-                 audio_bps=8):
+                 audio_bps=16):
         gr.hier_block2.__init__(self, "TunerDemodAM",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(1, 1, gr.sizeof_float))
@@ -288,7 +300,7 @@ class TunerDemodAM(BaseTuner):
         self.time_stamp = 0
         squelch_db = -60
         self.agc_ref = 0.1
-        self.file_name = "/dev/null"
+        self.file_name = None
         self.record = record
         self.min_file_size = min_file_size
 
@@ -298,8 +310,8 @@ class TunerDemodAM(BaseTuner):
 
         # Low pass filter taps for decimation by 5
         low_pass_filter_taps_0 = \
-            grfilter.firdes_low_pass(1, 1, 0.090, 0.010,
-                                     grfilter.firdes.WIN_HAMMING)
+            grfilter.firdes.low_pass(1, 1, 0.090, 0.010,
+                                     window.WIN_HAMMING)
 
         # Frequency translating FIR filter decimating by 5
         self.freq_xlating_fir_filter_ccc = \
@@ -314,8 +326,8 @@ class TunerDemodAM(BaseTuner):
         # Low pass filter taps for decimation from samp_rate/25 to 40-79.9 ksps
         # In other words, decimation by int(samp_rate/1E6)
         # 12.5 kHz cutoff for NBFM channel bandwidth
-        low_pass_filter_taps_1 = grfilter.firdes_low_pass(
-            1, samp_rate/decims[0]**2, 12.5E3, 1E3, grfilter.firdes.WIN_HAMMING)
+        low_pass_filter_taps_1 = grfilter.firdes.low_pass(
+            1, samp_rate/decims[0]**2, 12.5E3, 1E3, window.WIN_HAMMING)
 
         # FIR filter decimation by int(samp_rate/1E6)
         fir_filter_ccc_1 = grfilter.fir_filter_ccc(decims[1],
@@ -336,9 +348,9 @@ class TunerDemodAM(BaseTuner):
         am_demod_cf = blocks.complex_to_mag(1)
 
         # 3.5 kHz cutoff for audio bandwidth
-        low_pass_filter_taps_2 = grfilter.firdes_low_pass(1,\
+        low_pass_filter_taps_2 = grfilter.firdes.low_pass(1,\
                         samp_rate/(decims[1] * decims[0]**2),\
-                        3.5E3, 500, grfilter.firdes.WIN_HAMMING)
+                        3.5E3, 500, window.WIN_HAMMING)
 
         # FIR filter decimating by 5 from 40-79.9 ksps to 8-15.98 ksps
         fir_filter_fff_0 = grfilter.fir_filter_fff(decims[0],
@@ -366,12 +378,20 @@ class TunerDemodAM(BaseTuner):
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
         # File sink with single channel and 8 bits/sample
-        self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, audio_bps)
+        if (self.file_name != None):
+            self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
+                                                       audio_rate, audio_bps,
+                                                       blocks.FORMAT_WAV,
+                                                       blocks.FORMAT_PCM_16,
+                                                       False)
 
         # Connect the blocks for recording
         self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
-        self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
+        if (self.file_name != None):
+            self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
+        else:
+            null_sink1 = blocks.null_sink(gr.sizeof_float)
+            self.connect(analog_pwr_squelch_ff, null_sink1)
 
     def set_volume(self, volume_db):
         """Sets the volume
@@ -410,7 +430,7 @@ class Receiver(gr.top_block):
 
     def __init__(self, ask_samp_rate=4E6, num_demod=4, type_demod=0,
                  hw_args="uhd", freq_correction=0, record=True, play=True,
-                 audio_bps=8, min_file_size=0):
+                 audio_bps=16, min_file_size=0):
 
         # Call the initialization method from the parent class
         gr.top_block.__init__(self, "Receiver")

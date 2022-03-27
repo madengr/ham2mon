@@ -163,15 +163,24 @@ if __name__ == '__main__':
             curses.wrapper(main)
     except KeyboardInterrupt:
         pass
-    except RuntimeError:
-        print("")
-        print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
-        print("")
+#    except RuntimeError as err:
+#        print("")
+#        print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
+#        print("")
+#        print("RuntimeError: {err=}, {type(err)=}")
+#        print("")
     except err.LogError:
         print("")
         print("LogError: database logging not active, to be expanded.")
         print("")
-
+    except OSError as err:
+        print("")
+        print("OS error: {0}".format(err))
+        print("")
+#    except BaseException as err:
+#        print("")
+#        print("Unexpected: {err=}, {type(err)=}")
+#        print("")
 
     finally:
         # --- Cleanup on exit ---
