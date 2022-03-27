@@ -105,14 +105,14 @@ class CLParser(object):
                           help="File of EOL delimited priority channels in Hz")
 
         parser.add_option("-L", "--log_file", type="string",
-                           dest="channel_log_file_name",
-                           default="",
-                           help="Log file for channel detection")
+                          dest="channel_log_file_name",
+                          default="channel-log",
+                          help="Log file for channel detection")
 
         parser.add_option("-A", "--log_active_timeout", type="int",
-                           dest="channel_log_timeout",
-                           default=15,
-                           help="Timeout delay for active channel log entries")
+                          dest="channel_log_timeout",
+                          default=15,
+                          help="Timeout delay for active channel log entries")
 
         parser.add_option("-c", "--correction", type="int", dest="freq_correction",
                           default=0,
@@ -123,7 +123,7 @@ class CLParser(object):
                           help="Mute audio from speaker (still allows recording)")
 
         parser.add_option("-b", "--bps", type="int", dest="audio_bps",
-                          default=8,
+                          default=16,
                           help="Audio bit depth (bps)")
         
         parser.add_option("-M", "--max_db", type="float", dest="max_db",
@@ -201,6 +201,7 @@ def main():
     print("volume_db:           " + str(parser.volume_db))
     print("threshold_db:        " + str(parser.threshold_db))
     print("record:              " + str(parser.record))
+    print("play:                " + str(parser.play))
     print("lockout_file_name:   " + str(parser.lockout_file_name))
     print("priority_file_name:  " + str(parser.priority_file_name))
     print("channel_log_file_name:  " + str(parser.channel_log_file_name))

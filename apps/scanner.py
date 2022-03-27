@@ -114,6 +114,7 @@ class Scanner(object):
         self.lockout_file_name = lockout_file_name
         self.priority_file_name = priority_file_name
         self.channel_log_file_name = channel_log_file_name
+        self.channel_log_file = None
         self.channel_log_timeout = channel_log_timeout
         self.log_recent_channels = []
         self.log_timeout_last = int(time.time())
@@ -145,15 +146,6 @@ class Scanner(object):
         self.center_freq = self.receiver.center_freq
         self.min_freq = (self.center_freq - self.samp_rate/2)
         self.max_freq = (self.center_freq + self.samp_rate/2)
-
-
-#        # removed this since its essentially the same as above and this required spectrum first
-#        self.spectrum = self.receiver.probe_signal_vf.level()
-#        # estimate min/max frequency based on spectrum length and sample rate
-#        self.min_freq = ((0 - len(self.spectrum)/2) * (self.samp_rate / len(self.spectrum) \
-#                + self.center_freq))
-#        self.max_freq = ((len(self.spectrum) - len(self.spectrum)/2) * (self.samp_rate / len(self.spectrum) \
-#                + self.center_freq))
 
         # Start the receiver and wait for samples to accumulate
         self.receiver.start()
