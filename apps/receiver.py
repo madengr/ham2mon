@@ -25,6 +25,15 @@ class BaseTuner(gr.hier_block2):
     See TunerDemodNBFM and TunerDemodAM for better documentation.
     """
 
+    def __init__(self):
+        # Default values
+        self.last_heard = 0
+        self.active = False
+        self.file_name = None
+
+    def set_last_heard(self, a_time):
+        self.last_heard = a_time
+
     def set_center_freq(self, center_freq, rf_center_freq):
         """Sets baseband center frequency and file name
 
@@ -42,35 +51,42 @@ class BaseTuner(gr.hier_block2):
                 self.file_name != None):
             self.blocks_wavfile_sink.close()
 
-        # If we never wrote any data to the wavfile sink, delete the file
+        # If we did not write enough data to the wavfile sink, delete the file
         self._delete_wavfile_if_empty()
 
-        # Set the frequency
-        self.freq_xlating_fir_filter_ccc.set_center_freq(center_freq)
+        # Set the frequency of the tuner
         self.center_freq = center_freq
+        self.freq_xlating_fir_filter_ccc.set_center_freq(self.center_freq)
 
-        # Set the file name
-        timestamp = int(time.time())
+        # Set the file name if recording
         if self.center_freq == 0 or not self.record:
             # If tuner at zero Hz, or record false, then file name to None
-            file_name = None
+            self.file_name = None
         else:
-            # Otherwise use frequency and time stamp for file name
-            strtimestamp = "_" + str(timestamp)
-            file_freq = (rf_center_freq + self.center_freq)/1E6
-            file_freq = np.round(file_freq, 3)
-            file_name = 'wav/' + '{:.3f}'.format(file_freq) + strtimestamp + ".wav"
+            self.set_file_name(rf_center_freq)
 
-            # Make sure the 'wav' directory exists
-            try:
-                os.mkdir('wav')
-            except OSError:  # will need to add something here for Win support
-                pass  # directory already exists
-
-        if (file_name != None and self.record and self.file_name != None):
-            self.file_name = file_name
+        if (self.file_name != None and self.record):
             self.blocks_wavfile_sink.open(self.file_name)
 
+        self.active = True
+
+    def set_file_name(self, rf_center_freq):
+        # Otherwise use frequency and time stamp for file name
+        timestamp = int(time.time())
+        tstamp = time.strftime("%Y%m%d_%H%M%S", time.localtime()) + "{:.3f}".format(time.time()%1)[1:]
+        file_freq = (rf_center_freq + self.center_freq)/1E6
+        file_freq = np.round(file_freq, 4)
+        file_name = 'wav/' + '{:.4f}'.format(file_freq) + "_" + tstamp + ".wav"
+
+        # Make sure the 'wav' directory exists
+        # a better approach likely is checking existence instead of failing to create it
+        try:
+            os.mkdir('wav')
+        except OSError:  # will need to add something here for Win support
+            pass  # directory already exists
+
+        self.file_name = file_name
+        # timestamp the demod update to match filename
         self.time_stamp = timestamp
 
     def _delete_wavfile_if_empty(self):
@@ -83,6 +99,8 @@ class BaseTuner(gr.hier_block2):
         # the minimum defined size, then delete the (empty) wavfile
         if os.stat(self.file_name).st_size < (self.min_file_size):
             os.unlink(self.file_name)  # delete the file
+
+        self.active = False
 
     def set_squelch(self, squelch_db):
         """Sets the threshold for both squelches
@@ -222,17 +240,17 @@ class TunerDemodNBFM(BaseTuner):
         # Only want it to gate when the previous squelch has gone to zero
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
+        # Connect the blocks for recording
+        self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
+
         # File sink with single channel and bits/sample
-        if (self.file_name != None):
+        if (self.record):
+            self.set_file_name(self.center_freq)
             self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, audio_bps,
+                                                       audio_rate,
                                                        blocks.FORMAT_WAV,
                                                        blocks.FORMAT_PCM_16,
                                                        False)
-
-        # Connect the blocks for recording
-        self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
-        if (self.file_name != None):
             self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
         else:
             null_sink1 = blocks.null_sink(gr.sizeof_float)
@@ -377,17 +395,17 @@ class TunerDemodAM(BaseTuner):
         # Only want it to gate when the previous squelch has gone to zero
         analog_pwr_squelch_ff = analog.pwr_squelch_ff(-200, 1e-1, 0, True)
 
+        # Connect the blocks for recording
+        self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
+
         # File sink with single channel and 8 bits/sample
-        if (self.file_name != None):
+        if (self.record):
+            self.set_file_name(self.center_freq)
             self.blocks_wavfile_sink = blocks.wavfile_sink(self.file_name, 1,
-                                                       audio_rate, audio_bps,
+                                                       audio_rate,
                                                        blocks.FORMAT_WAV,
                                                        blocks.FORMAT_PCM_16,
                                                        False)
-
-        # Connect the blocks for recording
-        self.connect(pfb_arb_resampler_fff, analog_pwr_squelch_ff)
-        if (self.file_name != None):
             self.connect(analog_pwr_squelch_ff, self.blocks_wavfile_sink)
         else:
             null_sink1 = blocks.null_sink(gr.sizeof_float)

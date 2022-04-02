@@ -64,9 +64,14 @@ class Scanner(object):
         channel_log_timeout (int): Timeout delay between active channel entries in log
         audio_bps (int): Audio bit depth in bps (bits/samples)
         max_demod_length (int): Maximum demod time in seconds (0=disable)
+        freq_low (int): Freq below which we won't tune a receiver (Hz)
+        freq_high (int): Freq above which we won't tune a receiver (Hz)
+        spacing (int): granularity of frequency quantization
 
     Attributes:
         center_freq (float): Hardware RF center frequency in Hz
+        low_bound (int): Freq below which we won't tune a receiver (Hz)
+        high_bound (int): Freq above which we won't tune a receiver (Hz)
         samp_rate (float): Hardware sample rate in sps (1E6 min)
         gains : Enumerated gain types and values
         squelch_db (int): Squelch in dB
@@ -95,7 +100,7 @@ class Scanner(object):
                  channel_log_file_name="", channel_log_timeout=15,
                  play=True,
                  audio_bps=8, max_demod_length=0, channel_spacing=5000,
-                 min_file_size=0):
+                 min_file_size=0, freq_low=0, freq_high=2000000000):
 
         # Default values
         self.squelch_db = -60
@@ -103,6 +108,9 @@ class Scanner(object):
         self.threshold_db = 10
         self.record = record
         self.play = play
+        self.audio_bps = audio_bps
+        self.freq_low = freq_low
+        self.freq_high = freq_high
         self.spectrum = []
         self.lockout_channels = []
         self.priority_channels = []
@@ -121,6 +129,9 @@ class Scanner(object):
         self.log_mode = ""
         self.max_demod_length = max_demod_length
         self.min_file_size = min_file_size
+        self.low_bound = freq_low
+        self.high_bound = freq_high
+        self.hang_time = 1.0
 
         # Create receiver object
         self.receiver = recvr.Receiver(ask_samp_rate, num_demod, type_demod,
@@ -146,6 +157,14 @@ class Scanner(object):
         self.center_freq = self.receiver.center_freq
         self.min_freq = (self.center_freq - self.samp_rate/2)
         self.max_freq = (self.center_freq + self.samp_rate/2)
+        # cannot set channel freq lower than min sampled freq
+        if (self.freq_low < self.min_freq):
+            self.freq_low = self.min_freq
+        # cannot set channel freq higher than max sampled freq
+        if (self.freq_high > self.max_freq):
+            self.freq_high = self.max_freq
+        self.low_bound = self.freq_low - self.center_freq
+        self.high_bound = self.freq_high - self.center_freq
 
         # Start the receiver and wait for samples to accumulate
         self.receiver.start()
@@ -237,12 +256,18 @@ class Scanner(object):
         # Round channels to channel spacing
         # Note this affects tuning the demodulators
         # 5000 Hz is adequate for NBFM
-        channels = np.round(channels / self.channel_spacing) * self.channel_spacing
+        # Note that channel spacing is with respect to the center + baseband offset,
+        # not just the offset itself
+        real_channels = channels + self.center_freq
+        real_channels = np.round(real_channels / self.channel_spacing) * self.channel_spacing
+        channels = real_channels - self.center_freq
 
         # set active channels for gui highlight before filtering down lockout or adding priority
         active_channels = channels
 
         # Remove channels that are already in the priority list
+        # future, should find channels that are close too priority and replace with priority
+        # when less than channel_spacing separated from priority
         temp = []
         for channel in channels:
             if channel not in self.priority_channels:
@@ -263,17 +288,28 @@ class Scanner(object):
                 pass
         channels = temp
 
-        # Set demodulators that are no longer in channel list to 0 Hz
-        #for demodulator in self.receiver.demodulators:
+        # Remove channels that are outside the requested freq range
+#        temp = []
+#        for channel in channels:
+#            if channel > self.freq_low and channel < self.freq_high:
+#                temp = np.append(temp, channel)
+#            else:
+#                pass
+#        channels = temp
+
+        # Update demodulator last heards and expire old ones
+        the_now = time.time()
         for idx in range(len(self.receiver.demodulators)):
             demodulator = self.receiver.demodulators[idx]
             if (demodulator.center_freq != 0) and (demodulator.center_freq not in channels):
-                demodulator.set_center_freq(0, self.center_freq)
-                # Write in channel log file that the channel is off
-                demodulator_freq = demodulator.center_freq
-                self.__print_channel_log__(demodulator_freq + self.center_freq, False, idx)
+                if the_now - demodulator.last_heard > self.hang_time:
+                   demodulator.set_center_freq(0, self.center_freq)
+                   # Write in channel log file that the channel is off
+                   demodulator_freq = demodulator.center_freq
+                   self.__print_channel_log__(demodulator_freq + self.center_freq, False, idx)
             else:
-                pass
+                #pass
+                demodulator.set_last_heard(the_now)
 
         # Add new channels to demodulators
         for channel in channels:
@@ -448,6 +484,15 @@ class Scanner(object):
         # reset min/max based on sample rate
         self.min_freq = (self.center_freq - self.samp_rate/2)
         self.max_freq = (self.center_freq + self.samp_rate/2)
+        # reset low/high based on new center and bounds
+        self.freq_low = self.low_bound - self.center_freq
+        self.freq_high = self.high_bound + self.center_freq
+        # cannot set channel freq lower than min sampled freq
+        if (self.freq_low < self.min_freq):
+            self.freq_low = self.min_freq
+        # cannot set channel freq higher than max sampled freq
+        if (self.freq_high > self.max_freq):
+            self.freq_high = self.max_freq
 
         # Update the priority since frequency is changing
         self.update_priority()
@@ -525,7 +570,7 @@ def main():
     priority_file_name = parser.priority_file_name
     channel_log_file_name = parser.channel_log_file_name
     audio_bps = parser.audio_bps
-    max_demo_length = parser.max_demod_length
+    max_demod_length = parser.max_demod_length
     channel_spacing = parser.channel_spacing
     min_file_size = parser.min_file_size
     scanner = Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
