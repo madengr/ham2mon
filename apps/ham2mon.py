@@ -60,6 +60,7 @@ def main(screen):
     max_demod_length = PARSER.max_demod_length
     channel_spacing = PARSER.channel_spacing
     min_file_size = PARSER.min_file_size
+    center_freq = PARSER.center_freq
     freq_low = PARSER.freq_low
     freq_high = PARSER.freq_high
 
@@ -67,10 +68,10 @@ def main(screen):
                            freq_correction, record, lockout_file_name,
                            priority_file_name, channel_log_file_name, channel_log_timeout,
                            play, audio_bps, max_demod_length, channel_spacing, min_file_size,
-                           freq_low, freq_high)
+                           center_freq, freq_low, freq_high)
 
     # Set the paramaters
-    scanner.set_center_freq(PARSER.center_freq)
+    scanner.set_center_freq(center_freq)
     
     scanner.set_squelch(PARSER.squelch_db)
     scanner.set_volume(PARSER.volume_db)
