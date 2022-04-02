@@ -368,6 +368,8 @@ class RxWindow(object):
         self.center_freq = 146E6
         self.min_freq = 144E6
         self.max_freq = 148E6
+        self.freq_low = 144E6
+        self.freq_max = 148E6
         self.samp_rate = 2E6
         self.freq_entry = 'None'
         self.squelch_db = -60
@@ -398,8 +400,7 @@ class RxWindow(object):
         """Draws receiver paramaters
         """
 
-        # Clear previous contents, draw border, and title
-#        self.win.clear()
+        # Erase previous contents, draw border, and title
         # using erase prevents jitter in some terminals compared to clear() directly
         self.win.erase()
         self.win.border(0)
@@ -408,73 +409,139 @@ class RxWindow(object):
                          curses.color_pair(6) | curses.A_DIM | curses.A_BOLD)
 
         # Draw the receiver info prefix fields
+        index = 1
         text = "RF Freq (MHz)  : "
         self.win.addnstr(1, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Min Freq (MHz) : "
         self.win.addnstr(2, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Max Freq (MHz) : "
         self.win.addnstr(3, 1, text, 18, curses.color_pair(6))
+        
+        index = index+1
+        text = "Low Tune (MHz) : "
+        self.win.addnstr(4, 1, text, 18, curses.color_pair(6))
 
-        for index, gain in enumerate(self.gains, 2):
+        index = index+1
+        text = "High Tune (MHz): "
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        for index2, gain in enumerate(self.gains, 2):
             text = "{} Gain (dB){} : ".format(gain["name"], (4-len(gain["name"]))*' ')
-            self.win.addnstr(index+2, 1, text, 15)
+            self.win.addnstr(index+index2-1, 1, text, 18)
+            index3 = index2
 
+        index = index+index3
         text = "BB Rate (Msps) : "
-        self.win.addnstr(index+3, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "BB Sql  (dB)   : "
-        self.win.addnstr(index+4, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "AF Vol  (dB)   : "
-        self.win.addnstr(index+5, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Record         : "
-        self.win.addnstr(index+6, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Demod Type     : "
-        self.win.addnstr(index+7, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Lockout File   : "
-        self.win.addnstr(index+8, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Priority File  : "
-        self.win.addnstr(index+9, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Log File       : "
-        self.win.addnstr(index+10, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Log Timeout (s): "
-        self.win.addnstr(index+11, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
+
+        index = index+1
         text = "Log Mode       : "
-        self.win.addnstr(index+12, 1, text, 18, curses.color_pair(6))
+        self.win.addnstr(index, 1, text, 18, curses.color_pair(6))
 
         # Draw the receiver info suffix fields
+        index = 1
         if self.freq_entry != 'None':
             text = self.freq_entry
         else:
             text = '{:.3f}'.format((self.center_freq)/1E6)
-        self.win.addnstr(1, 20, text, 8, curses.color_pair(5))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        index = index+1
         text = '{:.3f}'.format((self.min_freq)/1E6)
-        self.win.addnstr(2, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        index = index+1
         text = '{:.3f}'.format((self.max_freq)/1E6)
-        self.win.addnstr(3, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
 
-        for index, gain in enumerate(self.gains, 2):
+        index = index+1
+        text = '{:.3f}'.format((self.freq_low)/1E6)
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        index = index+1
+        text = '{:.3f}'.format((self.freq_high)/1E6)
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        for index2, gain in enumerate(self.gains, 2):
             text = str(gain["value"])
-            self.win.addnstr(index+2, 20, text, 8, curses.color_pair(5))
+            self.win.addnstr(index+index2-1, 20, text, 8, curses.color_pair(5))
+            index3 = index2
 
+        index = index+index3
         text = str(self.samp_rate/1E6)
-        self.win.addnstr(index+3, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        index = index+1
         text = str(self.squelch_db)
-        self.win.addnstr(index+4, 20, text, 8, curses.color_pair(5))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        index = index+1
         text = str(self.volume_db)
-        self.win.addnstr(index+5, 20, text, 8, curses.color_pair(5))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(5))
+
+        index = index+1
         text = str(self.record)
-        self.win.addnstr(index+6, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(6))
+
+        index = index+1
         text = str(self.type_demod)
-        self.win.addnstr(index+7, 20, text, 8, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 8, curses.color_pair(6))
+
+        index = index+1
         text = str(self.lockout_file_name)
-        self.win.addnstr(index+8, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 20, curses.color_pair(6))
+
+        index = index+1
         text = str(self.priority_file_name)
-        self.win.addnstr(index+9, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 20, curses.color_pair(6))
+
+        index = index+1
         text = str(self.channel_log_file_name)
-        self.win.addnstr(index+10, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 20, curses.color_pair(6))
+
+        index = index+1
         text = str(self.channel_log_timeout)
-        self.win.addnstr(index+11, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 20, curses.color_pair(5))
+
+        index = index+1
         text = str(self.log_mode)
-        self.win.addnstr(index+12, 20, text, 20, curses.color_pair(6))
+        self.win.addnstr(index, 20, text, 20, curses.color_pair(6))
 
         # Hide cursor
         self.win.leaveok(1)

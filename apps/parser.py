@@ -34,6 +34,8 @@ class CLParser(object):
         max_demod_length (int): Timeout for long running demodulators to reset new file timestamp in seconds
         channel_spacing (int): Channel spacing (spectrum bin size) for identification of channels
         min_file_size (int): Minimum file size to save
+        freq_low (int): Low frequency for channels
+        freq_high (int): High frequency for channels
     """
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -54,6 +56,10 @@ class CLParser(object):
         parser.add_option("-d", "--demodulator", type="int", dest="type_demod",
                           default=0,
                           help="Type of demodulator (0=NBFM, 1=AM)")
+
+        parser.add_option("-e", "--range", type="string",
+                          dest="freq_range", default="0-2000000000",
+                          help="Limit reception to specified frequency range")
 
         parser.add_option("-f", "--freq", type="string", dest="center_freq",
                           default=146E6,
@@ -180,6 +186,15 @@ class CLParser(object):
         self.channel_spacing = int(options.channel_spacing)
         self.min_file_size = int(options.min_file_size)
 
+        try:
+            self.freq_low = int(options.freq_range.split('-')[0])
+        except:
+            self.freq_low = 0
+
+        try:
+            self.freq_high = int(options.freq_range.split('-')[1])
+        except:
+            self.freq_high = 0
 
 def main():
     """Test the parser"""
@@ -213,6 +228,8 @@ def main():
     print("max_demod_length:    " + str(parser.max_demod_length))
     print("channel_spacing:     " + str(parser.channel_spacing))
     print("min_file_size:       " + str(parser.min_file_size))
+    print("freq_low:            " + str(parser.freq_low))
+    print("freq_high:           " + str(parser.freq_high))
 
 
 if __name__ == '__main__':

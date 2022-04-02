@@ -60,10 +60,14 @@ def main(screen):
     max_demod_length = PARSER.max_demod_length
     channel_spacing = PARSER.channel_spacing
     min_file_size = PARSER.min_file_size
+    freq_low = PARSER.freq_low
+    freq_high = PARSER.freq_high
+
     scanner = scnr.Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                            freq_correction, record, lockout_file_name,
                            priority_file_name, channel_log_file_name, channel_log_timeout,
-                           play, audio_bps, max_demod_length, channel_spacing, min_file_size)
+                           play, audio_bps, max_demod_length, channel_spacing, min_file_size,
+                           freq_low, freq_high)
 
     # Set the paramaters
     scanner.set_center_freq(PARSER.center_freq)
@@ -78,6 +82,8 @@ def main(screen):
     rxwin.center_freq = scanner.center_freq
     rxwin.min_freq = scanner.min_freq
     rxwin.max_freq = scanner.max_freq
+    rxwin.freq_low = scanner.freq_low
+    rxwin.freq_high = scanner.freq_high
     rxwin.samp_rate = scanner.samp_rate
     rxwin.squelch_db = scanner.squelch_db
     rxwin.volume_db = scanner.volume_db
@@ -163,12 +169,12 @@ if __name__ == '__main__':
             curses.wrapper(main)
     except KeyboardInterrupt:
         pass
-#    except RuntimeError as err:
-#        print("")
-#        print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
-#        print("")
-#        print("RuntimeError: {err=}, {type(err)=}")
-#        print("")
+    except RuntimeError as err:
+        print("")
+        print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
+        print("")
+        print("RuntimeError: {err=}, {type(err)=}")
+        print("")
     except err.LogError:
         print("")
         print("LogError: database logging not active, to be expanded.")
@@ -177,10 +183,10 @@ if __name__ == '__main__':
         print("")
         print("OS error: {0}".format(err))
         print("")
-#    except BaseException as err:
-#        print("")
-#        print("Unexpected: {err=}, {type(err)=}")
-#        print("")
+    except BaseException as err:
+        print("")
+        print("Unexpected: {err=}, {type(err)=}", err, type(err))
+        print("")
 
     finally:
         # --- Cleanup on exit ---
