@@ -64,6 +64,7 @@ class Scanner(object):
         channel_log_timeout (int): Timeout delay between active channel entries in log
         audio_bps (int): Audio bit depth in bps (bits/samples)
         max_demod_length (int): Maximum demod time in seconds (0=disable)
+        center_freq (int): initial center frequency for receiver (Hz)
         freq_low (int): Freq below which we won't tune a receiver (Hz)
         freq_high (int): Freq above which we won't tune a receiver (Hz)
         spacing (int): granularity of frequency quantization
@@ -100,7 +101,7 @@ class Scanner(object):
                  channel_log_file_name="", channel_log_timeout=15,
                  play=True,
                  audio_bps=8, max_demod_length=0, channel_spacing=5000,
-                 min_file_size=0, freq_low=0, freq_high=2000000000):
+                 min_file_size=0, center_freq=0, freq_low=0, freq_high=2000000000):
 
         # Default values
         self.squelch_db = -60
@@ -111,6 +112,7 @@ class Scanner(object):
         self.audio_bps = audio_bps
         self.freq_low = freq_low
         self.freq_high = freq_high
+        self.center_freq = center_freq
         self.spectrum = []
         self.lockout_channels = []
         self.priority_channels = []
@@ -139,6 +141,9 @@ class Scanner(object):
                                        audio_bps,
                                        min_file_size)
 
+        # Set the initial center frequency here to allow setting min/max and low/high bounds
+        self.receiver.set_center_freq(center_freq)
+
         # Open channel log file for appending data, if it is specified
         if channel_log_file_name != "":
             self.channel_log_file = open(channel_log_file_name, 'a')
@@ -147,12 +152,12 @@ class Scanner(object):
             else:
                 # Opening log file failed so cannot perform this log mode
                 # Either raise exception or continue without logging, second preferable
-                self.log_mode = ""
+                self.log_mode = "none"
                 #raise(LogError("file","Cannot open log file"))
         else:
             self.channel_log_file = None
 
-        # Get the hardware sample rate and center frequency
+        # Get the hardware sample rate and center frequency in Hz
         self.samp_rate = self.receiver.samp_rate
         self.center_freq = self.receiver.center_freq
         self.min_freq = (self.center_freq - self.samp_rate/2)
@@ -178,7 +183,7 @@ class Scanner(object):
            self.channel_log_file.close()
 
     def __print_channel_log_active__(self, freq, state):
-        if self.log_mode is not None and state is True:
+        if self.log_mode is not None and self.log_mode != "none" and state is True:
             state_str = {True: "act", False: "off"}
             now = datetime.datetime.now()
             if self.log_mode == "file" and self.channel_log_file is not None:
@@ -199,7 +204,7 @@ class Scanner(object):
                 raise(err.LogError("unknown","no log mode defined"))
 
     def __print_channel_log__(self, freq, state, idx):
-        if self.log_mode is not None:
+        if self.log_mode is not None and self.log_mode != "none":
             state_str = {True: "on", False: "off"}
             if state == False:
                 freq = 0
@@ -289,13 +294,13 @@ class Scanner(object):
         channels = temp
 
         # Remove channels that are outside the requested freq range
-#        temp = []
-#        for channel in channels:
-#            if channel > self.freq_low and channel < self.freq_high:
-#                temp = np.append(temp, channel)
-#            else:
-#                pass
-#        channels = temp
+        temp = []
+        for channel in channels:
+            if channel > self.low_bound and channel < self.high_bound:
+                temp = np.append(temp, channel)
+            else:
+                pass
+        channels = temp
 
         # Update demodulator last heards and expire old ones
         the_now = time.time()
@@ -345,25 +350,26 @@ class Scanner(object):
                     # reset the demodulator to its frequency to restart file
                     demodulator.set_center_freq(0, temp_freq) 
 
-        # Create an tuned channel list of strings for the GUI
+        # Create an tuned channel list of strings for the GUI in MHz
         # If channel is a zero then use an empty string
         self.gui_tuned_channels = []
         for demod_freq in self.receiver.get_demod_freqs():
             if demod_freq == 0:
                 text = ""
             else:
-                # Calculate actual RF frequency
+                # Calculate actual RF frequency in MHz
                 gui_tuned_channel = (demod_freq + \
                                     self.center_freq)/1E6
                 text = '{:.3f}'.format(gui_tuned_channel)
             self.gui_tuned_channels.append(text)
 
-        # Create an active channel list of strings for the GUI
+        # Create an active channel list of strings for the GUI in MHz
         # This is any channel above threshold
         # do not include priority if not above threshold
         # do include lockout if above threshold
         self.gui_active_channels = []
         for channel in active_channels:
+            # calculate active channel freq in MHz
             gui_active_channel = (channel + self.center_freq)/1E6
             text = '{:.3f}'.format(gui_active_channel)
             self.gui_active_channels.append(text)
@@ -402,9 +408,10 @@ class Scanner(object):
                 self.lockout_channels = np.append(self.lockout_channels,
                                                   demod_freq)
 
-        # Create a lockout channel list of strings for the GUI
+        # Create a lockout channel list of strings for the GUI in MHz
         self.gui_lockout_channels = []
         for lockout_channel in self.lockout_channels:
+            # lockout channel in MHz
             gui_lockout_channel = (lockout_channel + \
                                     self.receiver.center_freq)/1E6
             text = '{:.3f}'.format(gui_lockout_channel)
@@ -435,9 +442,10 @@ class Scanner(object):
         else:
             pass
 
-        # Create a lockout channel list of strings for the GUI
+        # Create a lockout channel list of strings for the GUI in MHz
         self.gui_lockout_channels = []
         for lockout_channel in self.lockout_channels:
+            # lockout channel in MHz
             gui_lockout_channel = (lockout_channel + \
                                     self.receiver.center_freq)/1E6
             text = '{:.3f}'.format(gui_lockout_channel)
@@ -459,6 +467,7 @@ class Scanner(object):
                     lines = builtins.filter(None, lines)
                 else:
                     lines = __builtin__.filter(None, lines)
+
             # Convert to baseband frequencies, round, and append if within BW
             for freq in lines:
                 bb_freq = float(freq) - self.center_freq
@@ -473,6 +482,7 @@ class Scanner(object):
 
     def set_center_freq(self, center_freq):
         """Sets RF center frequency of hardware and clears lockout channels
+           Sets low and high demod frequency limits based on provided bounds in command line
 
         Args:
             center_freq (float): Hardware RF center frequency in Hz
@@ -484,7 +494,7 @@ class Scanner(object):
         # reset min/max based on sample rate
         self.min_freq = (self.center_freq - self.samp_rate/2)
         self.max_freq = (self.center_freq + self.samp_rate/2)
-        # reset low/high based on new center and bounds
+        # reset low/high freq for demod based on new center and bounds from original provided
         self.freq_low = self.low_bound - self.center_freq
         self.freq_high = self.high_bound + self.center_freq
         # cannot set channel freq lower than min sampled freq
@@ -573,17 +583,20 @@ def main():
     max_demod_length = parser.max_demod_length
     channel_spacing = parser.channel_spacing
     min_file_size = parser.min_file_size
+    center_freq = parser.center_freq
+    freq_low = parser.freq_low
+    freq_high = parser.freq_high
     scanner = Scanner(ask_samp_rate, num_demod, type_demod, hw_args,
                       freq_correction, record, lockout_file_name,
                       priority_file_name, channel_log_file_name,
                       audio_bps, max_demod_length, channel_spacing,
-                      min_file_size)
+                      min_file_size, center_freq, freq_low, freq_high)
 
     # Set frequency, gain, squelch, and volume
     scanner.set_center_freq(parser.center_freq)
     print("\n")
     print("Started %s at %.3f Msps" % (hw_args, scanner.samp_rate/1E6))
-    print("RX at %.3f MHz with %d dB gain" % (scanner.center_freq/1E6))
+    print("RX at %.3f MHz" % (scanner.center_freq/1E6))
     scanner.filter_and_set_gains(parser.gains)
     for gain in scanner.gains:
         print("gain %s at %d dB" % (gain["name"], gain["value"]))
