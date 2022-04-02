@@ -43,6 +43,10 @@ lordmorgul:
 - pulled gain corrections to python3 version from john
 - defined max file size to save from command line option
 - channel width configurable from command line option
+- incorporate miweber67 freq range limits
+
+miweber67
+- frequency range to limit selected channels to within specific limit
  
 john-:
 - long running file end (demodulator run time limit)
@@ -165,6 +169,9 @@ Active channels are flagged as active periodically based on the active channel l
 `  -f CENTER_FREQ, --freq=CENTER_FREQ`
 `                        Hardware RF center frequency in Hz`
 
+`  -e RANGE, --range=RANGE`
+`                        Limit reception to specified range, xx-yy in Hz`
+
 `  -r ASK_SAMP_RATE, --rate=ASK_SAMP_RATE`
 `                        Hardware ask sample rate in sps (1E6 minimum)`
 
@@ -225,6 +232,7 @@ Active channels are flagged as active periodically based on the active channel l
 `                        Channel spacing (spectrum bin size)`
 `  -F MIN_FILE_SIZE, --min-file-size=MIN_FILE_SIZE`
 `                        Minimum size file to save in bytes, default 0 (save all)`
+
 
 
 ## Description:
