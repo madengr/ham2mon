@@ -142,13 +142,13 @@ if __name__ == '__main__':
         PARSER = parser.CLParser()
         if len(PARSER.parser_args) != 0:
             PARSER.print_help() #pylint: disable=maybe-no-member
-            raise SystemExit, 1
+            raise(SystemExit, 1)
         else:
             curses.wrapper(main)
     except KeyboardInterrupt:
         pass
-    except RuntimeError:
-        print ""
-        print "RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root."
-        print ""
+    except RuntimeError as err:
+        print(err)
+        print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
+        print("")
 
