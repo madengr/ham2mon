@@ -147,8 +147,8 @@ if __name__ == '__main__':
             curses.wrapper(main)
     except KeyboardInterrupt:
         pass
-    except RuntimeError:
-        print("")
+    except RuntimeError as err:
+        print(err)
         print("RuntimeError: SDR hardware not detected or insufficient USB permissions. Try running as root.")
         print("")
 
