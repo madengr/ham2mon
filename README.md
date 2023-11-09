@@ -18,6 +18,7 @@ Recent development and tests on Python3:
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.8.2.0 (https://github.com/gnuradio/gnuradio)
 - GrOsmoSDR 0.1.4-29 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
+- Airspy Mini (https://airspy.com/airspy-mini/)
 - Python 3.8.6
 
 Previous version tests:
