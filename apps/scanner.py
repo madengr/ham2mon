@@ -495,7 +495,7 @@ class Scanner(object):
         self.min_freq = (self.center_freq - self.samp_rate/2)
         self.max_freq = (self.center_freq + self.samp_rate/2)
         # reset low/high freq for demod based on new center and bounds from original provided
-        self.freq_low = self.low_bound - self.center_freq
+        self.freq_low = self.low_bound + self.center_freq
         self.freq_high = self.high_bound + self.center_freq
         # cannot set channel freq lower than min sampled freq
         if (self.freq_low < self.min_freq):
