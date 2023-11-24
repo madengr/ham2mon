@@ -28,7 +28,6 @@ class BaseTuner(gr.hier_block2):
     def __init__(self):
         # Default values
         self.last_heard = 0
-        self.active = False
         self.file_name = None
 
     def set_last_heard(self, a_time):
@@ -68,8 +67,6 @@ class BaseTuner(gr.hier_block2):
         if (self.file_name != None and self.record):
             self.blocks_wavfile_sink.open(self.file_name)
 
-        self.active = True
-
     def set_file_name(self, rf_center_freq):
         # Otherwise use frequency and time stamp for file name
         timestamp = int(time.time())
@@ -99,8 +96,6 @@ class BaseTuner(gr.hier_block2):
         # the minimum defined size, then delete the (empty) wavfile
         if os.stat(self.file_name).st_size < (self.min_file_size):
             os.unlink(self.file_name)  # delete the file
-
-        self.active = False
 
     def set_squelch(self, squelch_db):
         """Sets the threshold for both squelches
