@@ -12,6 +12,24 @@ import cursesgui
 import parser
 import time
 import errors as err
+import traceback
+import sys
+import os
+from datetime import datetime
+
+def print_custom_error_message():
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    stack_summary = traceback.extract_tb(exc_tb)
+    end = stack_summary[-1]
+
+    err_type = type(exc_value).__name__
+    err_msg = str(exc_value)
+    date = datetime.strftime(datetime.now(), "%B %d, %Y at precisely %I:%M %p")
+
+    print(f"On {date}, a {err_type} occured in {end.filename} inside {end.name} on line {end.lineno} with the error message: {err_msg}.")
+    print(f"The following line of code is responsible: {end.line!r}")
+    print("Please make a note of it.")
+    print("")
 
 def main(screen):
     """Start scanner with GUI interface
@@ -157,7 +175,7 @@ def main(screen):
 
     # cleanup terminating all demodulators
     for demod in scanner.receiver.demodulators:
-        demod.set_center_freq(0, 0);
+        demod.set_tuner_freq(0, 0);
 
 if __name__ == '__main__':
     try:
@@ -176,18 +194,49 @@ if __name__ == '__main__':
         print("")
         print("RuntimeError: {err=}, {type(err)=}")
         print("")
+        print(traceback.format_exc)
+        print(sys.exc_info()[2])
+        print("")
+
+        print_custom_error_message()
+
     except err.LogError:
         print("")
         print("LogError: database logging not active, to be expanded.")
         print("")
+        print(traceback.format_exc)
+        print(sys.exc_info()[2])
+        print("")
+
+        print_custom_error_message()
+
     except OSError as err:
         print("")
         print("OS error: {0}".format(err))
         print("")
+        print(traceback.format_exc)
+        print(sys.exc_info()[2])
+        print("")
+
+        print_custom_error_message()
+
+        #exc_type, exc_obj, exc_tb = sys.exc_info()
+        #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #print(exc_type, fname, exc_tb.tb_lineno)
+
     except BaseException as err:
         print("")
         print("Unexpected: {err=}, {type(err)=}", err, type(err))
         print("")
+        print(traceback.format_exc)
+        print(sys.exc_info()[2])
+        print("")
+
+        print_custom_error_message()
+
+        #exc_type, exc_obj, exc_tb = sys.exc_info()
+        #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #print(exc_type, fname, exc_tb.tb_lineno)
 
     finally:
         # --- Cleanup on exit ---
