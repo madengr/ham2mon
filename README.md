@@ -3,9 +3,25 @@ This is a GNU Radio (GR) based SDR scanner with a Curses interface, primarily me
 
 http://youtu.be/BXptQFSV8E4
 
-![GUI screenshot](https://github.com/madengr/ham2mon/blob/master/ham2mon.png)
+Original screenshot
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon.png)
+
+Additional screenshots show updated screen color and channel highlighting with 
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_inactive_noise.png)
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_active.png)
+![GUI screenshot](https://github.com/lordmorgul/ham2mon/blob/master/ham2mon_priority_channels_overmax.png)
+
 
 ## Tested with:
+Recent development and tests on Python3:
+- RTL-SDR v3 RTL2832 + R820T at 2 Msps (http://rtl-sdr.com)
+- NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
+- GNU Radio 3.8.2.0 (https://github.com/gnuradio/gnuradio)
+- GrOsmoSDR 0.1.4-29 (http://sdr.osmocom.org/trac/wiki/GrOsmoSDR)
+- Airspy Mini (https://airspy.com/airspy-mini/)
+- Python 3.8.6
+
+Previous version tests:
 - Ettus B200 at 16 Msps (http://www.ettus.com)
 - NooElec RTL2832 + R820T at 2 Msps (http://www.nooelec.com)
 - GNU Radio 3.7.10 (https://github.com/gnuradio/gnuradio)
@@ -13,6 +29,35 @@ http://youtu.be/BXptQFSV8E4
 - Ettus UHD 3.10.0 (https://github.com/EttusResearch/uhd)
 
 ## Contributors:
+lordmorgul:
+- Min and max spectrum switches
+- Python3 builtin functions correction for priority and lockout parsing
+- Example priority and lockout files
+- Spectrum bar coloration (min/threshold/max)
+- Active channel tracking and coloration
+- GUI adjustments in channel and receiver windows, borders and labels
+- priority, lockout, and text log file name displays
+- pulled logger framework from kibihrchak and revised to python3
+- log file framework with enable flags (to prepare for multiple loggers implemented, text and database)
+- log file timeout so active channels are indicated only every TIMEOUT seconds
+- pulled long run demodulator fix to python3 version from john
+- pulled gain corrections to python3 version from john
+- defined max file size to save from command line option
+- channel width configurable from command line option
+- incorporate miweber67 freq range limits
+
+miweber67
+- frequency range to limit selected channels to within specific limit
+ 
+john-:
+- long running file end (demodulator run time limit)
+- gain config corrections, available gains detected from gnuradio and other inputs ignored / not shown
+
+kibihrchak:
+- Logger branch text file log entries
+
+ta6o:
+- Initial python3 fixes for syntax
 
 m0mik:
 - Added HackRF IF/BB gain parameters
@@ -36,7 +81,10 @@ madengr:
 - AM demodulation
 - Priority channels
 
+
 ## Console Operation:
+
+Options are displayed using ./parser.py -h
 
 The following is an example of the option switches for UHD with NBFM demodulation, although omission of any will use default values (shown below) that are optimal for the B200:
 
@@ -58,13 +106,21 @@ Example of reading from an IQ file:
 
 ./ham2mon.py -a "file=gqrx.raw,rate=8E6,repeat=false,throttle=true,freq=466E6" -r 8E6 -w
 
+##Channel Detection Log File
+
+For console operation, it is possible to specify the log file name, in which channel detection, and removal will be logged. The option is `--log_file=<file-name>`.
+
+Whenever a channel appears/dissapears, new line will be written in the log file. For the line format, check `__print_channel_log__()` in `scanner.Scanner`.
+
+Active channels are flagged as active periodically based on the active channel logging timeout.
+
 ## GUI Controls:
 
 `t/r = Detection threshold +/- 5 dB. (T/R for +/- 1dB)`
 
-`p/o = Spectrum upper scale +/- 10 dB`
+`p/o = Spectrum upper scale +/- 5 dB`
 
-`w/q = Spectrum lower scale +/- 10 dB`
+`w/q = Spectrum lower scale +/- 5 dB`
 
 `g/f = RF gain +/- 10 dB (G/F for +/- 1dB)`
 
@@ -92,6 +148,8 @@ Example of reading from an IQ file:
 
 `CTRL-C = quit`
 
+`SHIFT-R = quit`
+
 ## Help Menu
 
 `Usage: ham2mon.py [options]`
@@ -112,6 +170,9 @@ Example of reading from an IQ file:
 `  -f CENTER_FREQ, --freq=CENTER_FREQ`
 `                        Hardware RF center frequency in Hz`
 
+`  -e RANGE, --range=RANGE`
+`                        Limit reception to specified range, xx-yy in Hz`
+
 `  -r ASK_SAMP_RATE, --rate=ASK_SAMP_RATE`
 `                        Hardware ask sample rate in sps (1E6 minimum)`
 
@@ -121,8 +182,14 @@ Example of reading from an IQ file:
 `  -i IF_GAIN_DB, --if_gain=IF_GAIN_DB`
 `                        Hardware IF gain in dB`
 
+`  -j IF_GAIN_DB, --lna_gain=LNA_GAIN_DB`
+`                        Hardware LNA gain in dB`
+
 `  -o BB_GAIN_DB, --bb_gain=BB_GAIN_DB`
 `                        Hardware BB gain in dB`
+
+`  -x MIX_GAIN_DB, --mix_gain=MIX_GAIN_DB`
+`                        Hardware MIX gain in dB`
 
 `  -s SQUELCH_DB, --squelch=SQUELCH_DB`
 `                        Squelch in dB`
@@ -141,6 +208,12 @@ Example of reading from an IQ file:
 `  -p PRIORITY_FILE_NAME, --priority=PRIORITY_FILE_NAME`
 `                        File of EOL delimited priority channels in Hz`
 
+`  -L CHANNEL_LOG_FILE_NAME, --log-file=CHANNEL_LOG_FILE_NAME`
+`                        File for output of channel activity (demod lock/unlock) and active channels detection`
+
+`  -A LOG_ACTIVE_TIMEOUT, --log_active_timeout=LOG_ACTIVE_TIMEOUT`
+`                        Timeout delay between marking a channel active in the log file in seconds`
+
 `  -c FREQ_CORRECTION, --correction=FREQ_CORRECTION`
 `                        Frequency correction in ppm`
 
@@ -148,6 +221,19 @@ Example of reading from an IQ file:
 
 `  -b AUDIO_BPS, --bps=AUDIO_BPS`
 `                        Audio bit depth (bps)`
+
+`  -M MAX_DB, --max_db=MAX_DB`
+`                        Spectrum window maximum in dB`
+
+`  -N MIN_DB, --min_db=MIN_DB`
+`                        Spectrum window minimum in dB`
+`  -k MAX_DEMOD_LENGTH, --max-demod-length=MAX_DEMOD_LENGTH`
+`                        Maxumum length for a demodulation (sec)`
+`  -B CHANNEL_SPACING, --channel-spacing=CHANNEL_SPACING`
+`                        Channel spacing (spectrum bin size)`
+`  -F MIN_FILE_SIZE, --min-file-size=MIN_FILE_SIZE`
+`                        Minimum size file to save in bytes, default 0 (save all)`
+
 
 
 ## Description:

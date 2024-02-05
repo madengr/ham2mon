@@ -17,7 +17,7 @@ class CLParser(object):
         num_demod (int): Number of parallel demodulators
         center_freq (float): Hardware RF center frequency in Hz
         ask_samp_rate (float): Asking sample rate of hardware in sps (1E6 min)
-        gain_db (int): Hardware RF gain in dB
+        gains : Enumerated gain types and values
         squelch_db (int): Squelch in dB
         volume_dB (int): Volume in dB
         threshold_dB (int): Threshold for channel detection in dB
@@ -25,8 +25,17 @@ class CLParser(object):
         play (bool): Play audio through speaker if True
         lockout_file_name (string): Name of file with channels to lockout
         priority_file_name (string): Name of file with channels to for priority
+        channel_log_file_name (string): Name of file for channel logging
+        channel_log_timeout (int): Timeout delay between active channel log entries
         freq_correction (int): Frequency correction in ppm
         audio_bps (int): Audio bit depth in bps
+        max_db (float): Spectrum max dB for display
+        min_db (float): Spectrum min dB for display
+        max_demod_length (int): Timeout for long running demodulators to reset new file timestamp in seconds
+        channel_spacing (int): Channel spacing (spectrum bin size) for identification of channels
+        min_file_size (int): Minimum file size to save
+        freq_low (int): Low frequency for channels
+        freq_high (int): High frequency for channels
     """
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -48,6 +57,10 @@ class CLParser(object):
                           default=0,
                           help="Type of demodulator (0=NBFM, 1=AM)")
 
+        parser.add_option("-e", "--range", type="string",
+                          dest="freq_range", default="0-2000000000",
+                          help="Limit reception to specified frequency range")
+
         parser.add_option("-f", "--freq", type="string", dest="center_freq",
                           default=146E6,
                           help="Hardware RF center frequency in Hz")
@@ -56,14 +69,20 @@ class CLParser(object):
                           default=4E6,
                           help="Hardware ask sample rate in sps (1E6 minimum)")
 
-        parser.add_option("-g", "--gain", type="eng_float", dest="gain_db",
+        parser.add_option("-g", "--gain", type="eng_float", dest="rf_gain_db",
                           default=0, help="Hardware RF gain in dB")
 
         parser.add_option("-i", "--if_gain", type="eng_float", dest="if_gain_db",
-                          default=16, help="Hardware IF gain in dB")
+                          default=16, help="Hardware IF gain in dB or index (driver dependent)")
 
         parser.add_option("-o", "--bb_gain", type="eng_float", dest="bb_gain_db",
                           default=16, help="Hardware BB gain in dB")
+
+        parser.add_option("-j", "--lna_gain", type="eng_float", dest="lna_gain_db",
+                          default=8, help="Hardware LNA gain index")
+
+        parser.add_option("-x", "--mix_gain", type="eng_float", dest="mix_gain_db",
+                          default=5, help="Hardware MIX gain index")
 
         parser.add_option("-s", "--squelch", type="eng_float",
                           dest="squelch_db", default=-60,
@@ -91,6 +110,16 @@ class CLParser(object):
                           default="",
                           help="File of EOL delimited priority channels in Hz")
 
+        parser.add_option("-L", "--log_file", type="string",
+                          dest="channel_log_file_name",
+                          default="channel-log",
+                          help="Log file for channel detection")
+
+        parser.add_option("-A", "--log_active_timeout", type="int",
+                          dest="channel_log_timeout",
+                          default=15,
+                          help="Timeout delay for active channel log entries")
+
         parser.add_option("-c", "--correction", type="int", dest="freq_correction",
                           default=0,
                           help="Frequency correction in ppm")
@@ -100,8 +129,28 @@ class CLParser(object):
                           help="Mute audio from speaker (still allows recording)")
 
         parser.add_option("-b", "--bps", type="int", dest="audio_bps",
-                          default=8,
+                          default=16,
                           help="Audio bit depth (bps)")
+        
+        parser.add_option("-M", "--max_db", type="float", dest="max_db",
+                          default=50,
+                          help="Spectrum window max dB for display")
+        
+        parser.add_option("-N", "--min_db", type="float", dest="min_db",
+                          default=-10,
+                          help="Spectrum window min dB for display (no greater than -10dB from max")
+        
+        parser.add_option("-k", "--max-demod-length", type="int", dest="max_demod_length",
+                          default=0,
+                          help="Maxumum length for a demodulation (sec)")
+
+        parser.add_option("-B", "--channel-spacing", type="int", dest="channel_spacing",
+                          default=5000,
+                          help="Channel spacing (spectrum bin size)")
+
+        parser.add_option("-F", "--min-file-size", type="int", dest="min_file_size",
+                          default=0,
+                          help="Minimum size file to save in bytes, default 0 (save all)")
 
         options = parser.parse_args()[0]
         self.parser_args = parser.parse_args()[1]
@@ -111,9 +160,15 @@ class CLParser(object):
         self.type_demod = int(options.type_demod)
         self.center_freq = float(options.center_freq)
         self.ask_samp_rate = float(options.ask_samp_rate)
-        self.gain_db = float(options.gain_db)
-        self.if_gain_db = float(options.if_gain_db)
-        self.bb_gain_db = float(options.bb_gain_db)
+
+        self.gains = [
+            { "name": "RF", "value": float(options.rf_gain_db),  "query": "yes" },
+            { "name": "LNA","value": float(options.lna_gain_db), "query": "no" },
+            { "name": "MIX","value": float(options.mix_gain_db), "query": "no" },
+            { "name": "IF", "value": float(options.if_gain_db),  "query": "no" },
+            { "name": "BB", "value": float(options.bb_gain_db),  "query": "no" }
+        ]
+
         self.squelch_db = float(options.squelch_db)
         self.volume_db = float(options.volume_db)
         self.threshold_db = float(options.threshold_db)
@@ -121,9 +176,25 @@ class CLParser(object):
         self.play = bool(options.play)
         self.lockout_file_name = str(options.lockout_file_name)
         self.priority_file_name = str(options.priority_file_name)
+        self.channel_log_file_name = str(options.channel_log_file_name)
+        self.channel_log_timeout = int(options.channel_log_timeout)
         self.freq_correction = int(options.freq_correction)
         self.audio_bps = int(options.audio_bps)
+        self.max_db = float(options.max_db)
+        self.min_db = float(options.min_db)
+        self.max_demod_length = int(options.max_demod_length)
+        self.channel_spacing = int(options.channel_spacing)
+        self.min_file_size = int(options.min_file_size)
 
+        try:
+            self.freq_low = int(options.freq_range.split('-')[0])
+        except:
+            self.freq_low = 0
+
+        try:
+            self.freq_high = int(options.freq_range.split('-')[1])
+        except:
+            self.freq_high = 0
 
 def main():
     """Test the parser"""
@@ -132,24 +203,33 @@ def main():
 
     if len(parser.parser_args) != 0:
         parser.print_help() #pylint: disable=maybe-no-member
-        raise SystemExit, 1
+        raise(SystemExit, 1)
 
-    print "hw_args:             " + parser.hw_args
-    print "num_demod:           " + str(parser.num_demod)
-    print "type_demod:          " + str(parser.type_demod)
-    print "center_freq:         " + str(parser.center_freq)
-    print "ask_samp_rate:       " + str(parser.ask_samp_rate)
-    print "gain_db:             " + str(parser.gain_db)
-    print "if_gain_db:          " + str(parser.if_gain_db)
-    print "bb_gain_db:          " + str(parser.bb_gain_db)
-    print "squelch_db:          " + str(parser.squelch_db)
-    print "volume_db:           " + str(parser.volume_db)
-    print "threshold_db:        " + str(parser.threshold_db)
-    print "record:              " + str(parser.record)
-    print "lockout_file_name:   " + str(parser.lockout_file_name)
-    print "priority_file_name:  " + str(parser.priority_file_name)
-    print "freq_correction:     " + str(parser.freq_correction)
-    print "audio_bps:           " + str(parser.audio_bps)
+    print("hw_args:             " + parser.hw_args)
+    print("num_demod:           " + str(parser.num_demod))
+    print("type_demod:          " + str(parser.type_demod))
+    print("center_freq:         " + str(parser.center_freq))
+    print("ask_samp_rate:       " + str(parser.ask_samp_rate))
+    for gain in parser.gains:
+        print("gain %s at %d dB" % (gain["name"], gain["value"]))
+    print("squelch_db:          " + str(parser.squelch_db))
+    print("volume_db:           " + str(parser.volume_db))
+    print("threshold_db:        " + str(parser.threshold_db))
+    print("record:              " + str(parser.record))
+    print("play:                " + str(parser.play))
+    print("lockout_file_name:   " + str(parser.lockout_file_name))
+    print("priority_file_name:  " + str(parser.priority_file_name))
+    print("channel_log_file_name:  " + str(parser.channel_log_file_name))
+    print("channel_log_timeout:  " + str(parser.channel_log_timeout))
+    print("freq_correction:     " + str(parser.freq_correction))
+    print("audio_bps:           " + str(parser.audio_bps))
+    print("max_db:              " + str(parser.max_db))
+    print("min_db:              " + str(parser.min_db))
+    print("max_demod_length:    " + str(parser.max_demod_length))
+    print("channel_spacing:     " + str(parser.channel_spacing))
+    print("min_file_size:       " + str(parser.min_file_size))
+    print("freq_low:            " + str(parser.freq_low))
+    print("freq_high:           " + str(parser.freq_high))
 
 
 if __name__ == '__main__':
